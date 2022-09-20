@@ -240,7 +240,12 @@ class CarlaEnv(object):
         # return obs
 
     def step(self, action):
-        action_out, current_image = self.env.step(action)
+        assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
+            'the action should be in range [-1.0, 1.0]'
+        mapped_action = self.low_bound + (action - (-1.0)) * (
+            (self.high_bound - self.low_bound) / 2.0)
+        mapped_action = np.clip(mapped_action, self.low_bound, self.high_bound)
+        action_out, current_image = self.env.step(mapped_action)
         bounded_image = None
         numpy_rgb_image = None
         print("STEP FUNCTION IN CARLA_ENV_REMOTE CLASS")
