@@ -32,26 +32,11 @@ params = {
 }
 
 # train env params
-"""
-Set ports of CARLA services for parallel data collecting and training.
-You can start CARLA services in different new terminals with respect to the ports list.
-
-e.g.1
-    set three ports --> parallel training with three envs
-    train_env_ports = [2021, 2023, 2025]
-e.g.2
-    set five ports --> parallel training with five envs
-    train_env_ports = [2017, 2019, 2021, 2023, 2025]
-"""
-# train_env_ports = [2021, 2023, 2025]
-train_env_ports = [2021]
+train_env_port = 2021
 train_code_mode = 'train'
-train_envs_params = []
-for port in train_env_ports:
-    temp_params = deepcopy(params)
-    temp_params['port'] = port
-    temp_params['code_mode'] = train_code_mode
-    train_envs_params.append(temp_params)
+train_envs_params = deepcopy(params)
+train_envs_params['port'] = port
+train_envs_params['code_mode'] = train_code_mode
 
 # evaluate env params
 eval_port = 2027

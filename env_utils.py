@@ -1,5 +1,4 @@
 import copy
-import parl
 import carla
 import gym
 import gym_carla
@@ -17,16 +16,10 @@ from torch_base import DetectBoundingBox
 class ParallelEnv(object):
     def __init__(self, env_name, xparl_addr, train_envs_params):
         print("trying to connect to remote env")
-        parl.connect(xparl_addr)
-        self.env_list = [
-            CarlaRemoteEnv(env_name=env_name, params=params)
-            for params in train_envs_params
-        ]
-        print("Env List:", self.env_list)
-        self.env_num = len(self.env_list)
-        self.episode_reward_list = [0] * self.env_num
-        self.episode_steps_list = [0] * self.env_num
-        self._max_episode_steps = train_envs_params[0]['max_time_episode']
+        self.env = CarlaEnv(env_name=env_name, params=train_envs_params)
+        self.episode_reward = 0
+        self.episode_steps = 0
+        self._max_episode_steps = train_envs_params['max_time_episode']
         self.total_steps = 0
         print("Init Successfully executed")
 
@@ -183,8 +176,7 @@ class LocalEnv(object):
             # faster_rcnn_obj.detect_bounding_boxes()
         return action_out, current_image
 
-@parl.remote_class(wait=False)
-class CarlaRemoteEnv(object):
+class CarlaEnv(object):
     def __init__(self, env_name, params):
         print("Came Inside Remote Init")
         class ActionSpace(object):

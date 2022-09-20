@@ -3,7 +3,6 @@ import numpy as np
 from parl.utils import logger, tensorboard, ReplayMemory
 from env_utils import ParallelEnv, LocalEnv
 from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
-#from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 import matplotlib.pyplot as plt
 from torch_base import DetectBoundingBox
@@ -87,10 +86,7 @@ def main():
 
 
     # Initialize model, algorithm, agent, replay_memory
-    if args.framework == 'torch':
-        CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
-    elif args.framework == 'paddle':
-        CarlaModel, SAC, CarlaAgent = PaddleModel, PaddleSAC, PaddleAgent
+    CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
     model = CarlaModel(obs_dim, action_dim)
     print("Model Created")
     algorithm = SAC(
