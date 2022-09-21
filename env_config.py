@@ -35,7 +35,7 @@ params = {
 train_env_port = 2021
 train_code_mode = 'train'
 train_envs_params = deepcopy(params)
-train_envs_params['port'] = port
+train_envs_params['port'] = train_env_port
 train_envs_params['code_mode'] = train_code_mode
 
 # evaluate env params
@@ -57,7 +57,6 @@ test_env_params = temp_params
 EnvConfig = {
     # train envs config
     'train_envs_params': train_envs_params,
-    'env_num': len(train_envs_params),
 
     # eval env config
     'eval_env_params': eval_env_params,

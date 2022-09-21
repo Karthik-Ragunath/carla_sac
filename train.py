@@ -69,8 +69,7 @@ def main():
 
     # Parallel environments for training
     train_envs_params = EnvConfig['train_envs_params']
-    env_num = EnvConfig['env_num']
-    env_list = ParallelEnv(args.env, args.xparl_addr, train_envs_params)
+    train_env = ParallelEnv(args.env, train_envs_params)
 
     # env for eval
     eval_env_params = EnvConfig['eval_env_params']
@@ -105,7 +104,7 @@ def main():
     last_save_steps = 0
     test_flag = 0
 
-    obs_list = env_list.reset()
+    obs_list = train_env.reset()
     print("OLD OBSERVATION LIST:", obs_list)
     while total_steps < args.train_total_steps:
         # Train episode
@@ -115,7 +114,7 @@ def main():
             print("@"*20, "WARMUP STEP", "@"*20)
             action_list = [
                 np.random.uniform(-1, 1, size=action_dim)
-                for _ in range(env_num)
+                for _ in range(1)
             ]
         else:
             print("ALREADY WARMED UP")
@@ -126,16 +125,16 @@ def main():
             print("Action List Returned In Train:", action_list)
 
 
-        next_obs_list, reward_list, done_list, info_list, next_obs_rgb_list = env_list.step(
+        next_obs_list, reward_list, done_list, info_list, next_obs_rgb_list = train_env.step(
             action_list)
 
         # Store data in replay memory
-        for i in range(env_num):
+        for i in range(1):
             rpm.append(obs_list[i], action_list[i], reward_list[i],
                        next_obs_rgb_list[i], done_list[i])
 
-        obs_list = env_list.get_obs()
-        total_steps = env_list.total_steps
+        obs_list = train_env.get_obs()
+        total_steps = train_env.total_steps
         # print("NEW OBS LIST:", obs_list)
         # break
 

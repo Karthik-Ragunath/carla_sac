@@ -14,7 +14,7 @@ sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/')
 from torch_base import DetectBoundingBox
 
 class ParallelEnv(object):
-    def __init__(self, env_name, xparl_addr, train_envs_params):
+    def __init__(self, env_name, train_envs_params):
         print("trying to connect to remote env")
         self.env = CarlaEnv(env_name=env_name, params=train_envs_params)
         self.episode_reward = 0

@@ -99,7 +99,8 @@ class CarlaEnv(gym.Env):
 
         # store current image
         self.current_image = None
-        print("Carla Init Executed")
+        print("Just to make sure")
+        print("Carla Init Executed Now")
 
     def reset(self):
         # print("carla_env.py reset function called")
