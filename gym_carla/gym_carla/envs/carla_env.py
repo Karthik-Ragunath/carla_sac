@@ -208,18 +208,18 @@ class CarlaEnv(gym.Env):
                 print("*"*30, "Intersection Other Lane:", intersection_otherlane, "Intersection Offroad:", intersection_offroad, "*"*30)
                 '''
 
-                # current_location = self.ego.get_location()
-                # print("^" * 30, "Current Location:", current_location, "^" * 30)
-                # waypoint_info = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True)
-                # print("#" * 30, 'waypoint info:', waypoint_info, "#" * 30)
-                # waypoint_info_lane = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True, lane_type=carla.LaneType.Any)
-                # print('@' * 30, 'Waypoint Lane Info:', waypoint_info_lane, '@' * 30)
-                # ego_location = self.ego.get_transform().location
-                # print("Ego Transformed Location:", ego_location)
-                # bounding_box = self.ego.bounding_box
-                # print("Bounding Box:", bounding_box)
-                # # bounding_box_transform = self.ego.bounding_box.transform
-                # # print("Bounding Box Transform:", bounding_box_transform)
+                current_location = self.ego.get_location()
+                print("^" * 30, "Current Location:", current_location, "^" * 30)
+                waypoint_info = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True)
+                print("#" * 30, 'waypoint info:', waypoint_info, "#" * 30)
+                waypoint_info_lane = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True, lane_type=carla.LaneType.Any)
+                print('@' * 30, 'Waypoint Lane Info:', waypoint_info_lane, '@' * 30)
+                ego_location = self.ego.get_transform().location
+                print("Ego Transformed Location:", ego_location)
+                bounding_box = self.ego.bounding_box
+                print("Bounding Box:", bounding_box)
+                bounding_box_transform = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
+                print("Bounding Box Transform:", bounding_box_transform)
 
                 time.sleep(3)
                 self.collision_hist = []
@@ -304,7 +304,10 @@ class CarlaEnv(gym.Env):
                 self.logger.error("Env reset() error")
                 self.logger.error(e)
                 time.sleep(2)
-                self._make_carla_client('localhost', self.port), self.current_image
+                # Delete sensors, vehicles and walkers
+                while self.actors:
+                    (self.actors.pop()).destroy()
+                self._make_carla_client('localhost', self.port)
 
     def step(self, action):
         try:
