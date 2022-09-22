@@ -237,7 +237,7 @@ class CarlaEnv(gym.Env):
                 init_speed = carla.Vector3D(
                     x=self.desired_speed * np.cos(yaw),
                     y=self.desired_speed * np.sin(yaw))
-                self.ego.set_velocity(init_speed)
+                self.ego.set_target_velocity(init_speed)
                 self.world.tick()
                 self.world.tick()
 
