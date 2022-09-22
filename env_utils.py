@@ -24,32 +24,16 @@ class ParallelEnv(object):
         print("Init Successfully executed")
 
     def reset(self):
-        # print("env_utils.py:", "reset function")
-        print("Env List:", self.env_list)
-        obs_list = []
-        for env in self.env_list:
-            print("Reset Function Is About To Be Called")
-            while True:
-                obs = env.reset()
-                print("ENV RESETTED")
-                get_obs = obs.get()
-                # print("Observation:", get_obs)
-                if not get_obs[1].any():
-                    print("Okay Okay Okay !!!")
-                    continue
-                else:
-                    print("Okay!!! Now we are talking")
-                    print("LETS TALK SHAPES -", "Orig Image Shape:", get_obs[1].shape, "Bounded Image Shape:", get_obs[2].shape)
-                    break
-            obs_list.append((get_obs[1], get_obs[2]))
-            # print("Obs List:", obs_list)
-        # obs_list = [env.reset() for env in self.env_list]
-        # # print("Resetting Envs:", obs_list)
-        # obs_list = [obs.get() for obs in obs_list]
-        # print("getting observations:", obs_list)
-        self.obs_list = np.array(obs_list)
+        while True:
+            obs = self.env.reset()
+            if not obs[1].any():
+                continue
+            else:
+                break
+        obs_tup = (obs[1], obs[2])
+        self.obs_tup = np.array(obs_tup)
         # print("After Numpy Converted:", self.obs_list)
-        return self.obs_list
+        return self.obs_tup
 
     def step(self, action_list):
         '''
@@ -197,7 +181,6 @@ class CarlaEnv(object):
         print("Trying To Create Remote GYM Env")
         self.env = gym.make(env_name, params=params)
         print("Remote Env Made")
-        self.env = ActionMappingWrapper(self.env)
         self._max_episode_steps = int(params['max_time_episode'])
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
