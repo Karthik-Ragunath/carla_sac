@@ -32,7 +32,6 @@ class ParallelEnv(object):
                 break
         obs_tup = (obs[1], obs[2])
         self.obs_tup = np.array(obs_tup)
-        # print("After Numpy Converted:", self.obs_list)
         return self.obs_tup
 
     def step(self, action_list):
