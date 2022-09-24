@@ -34,46 +34,22 @@ class ParallelEnv(object):
         self.obs_tup = np.array(obs_tup)
         return self.obs_tup
 
-    def step(self, action_list):
-        '''
-        return_list = [
-            self.env_list[i].step(action_list[i]) for i in range(self.env_num)
-        ]
-        return_list = [return_.get() for return_ in return_list]
-        print("Return List:", return_list)
-        return_list = np.array(return_list, dtype=object)
-        self.next_obs_list = return_list[:, 0]
-        self.reward_list = return_list[:, 1]
-        self.done_list = return_list[:, 2]
-        self.info_list = return_list[:, 3]
-        return self.next_obs_list, self.reward_list, self.done_list, self.info_list
-        '''
-        print("STEP FUNCTION CALLED NOW")
-        self.next_waypoint_obs_list = []
-        self.reward_list = []
-        self.done_list = []
-        self.info_list = []
-        self.next_obs_rgb_list = []
-        for action_index, action in enumerate(action_list):
-            print("ACTION TENSOR:", action)
-            return_tuple = self.env_list[action_index].step(action)
-            get_obs = return_tuple.get()
-            return_list, numpy_rgb_image, bounding_box_image = get_obs
-            if numpy_rgb_image.any():
-                print("Image Does Exists")
-            self.next_waypoint_obs_list.append(return_list[0])
-            self.reward_list.append(return_list[1])
-            self.done_list.append(return_list[2])
-            self.info_list.append(return_list[3])
-            self.next_obs_rgb_list.append((numpy_rgb_image, bounding_box_image))
-        self.next_waypoint_obs_list = np.array(self.next_waypoint_obs_list, dtype=object)
-        self.reward_list = np.array(self.reward_list, dtype=object)
-        self.done_list = np.array(self.done_list, dtype=object)
-        self.info_list = np.array(self.info_list, dtype=object)
-        print("NEXT OBS SHAPE OLD:", self.next_obs_rgb_list[0][0].shape)
-        self.next_obs_rgb_list = np.array(self.next_obs_rgb_list, dtype=object)
-        print("NEXT OBS SHAPE:", self.next_obs_rgb_list.shape)
-        return self.next_waypoint_obs_list, self.reward_list, self.done_list, self.info_list, self.next_obs_rgb_list
+    def step(self, action):
+        return_tuple = self.env.step(action)
+        return_list, numpy_rgb_image, bounding_box_image = return_tuple
+        if numpy_rgb_image.any():
+            print("Image Does Exists")
+        self.next_waypoint_obs = return_list[0]
+        self.reward = return_list[1]
+        self.done = return_list[2]
+        self.info = return_list[3]
+        self.next_obs_rgb = (numpy_rgb_image, bounding_box_image)
+        # self.next_waypoint_obs = np.array(self.next_waypoint_obs, dtype=object)
+        # self.reward = np.array(self.reward, dtype=object)
+        # self.done = np.array(self.done, dtype=object)
+        # self.info = np.array(self.info, dtype=object)
+        # self.next_obs_rgb = np.array(self.next_obs_rgb, dtype=object)
+        return self.next_waypoint_obs, self.reward, self.done, self.info, self.next_obs_rgb
 
     def get_obs(self):
         for i in range(self.env_num):
@@ -224,9 +200,9 @@ class CarlaEnv(object):
     def step(self, action):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
             'the action should be in range [-1.0, 1.0]'
-        mapped_action = self.low_bound + (action - (-1.0)) * (
-            (self.high_bound - self.low_bound) / 2.0)
-        mapped_action = np.clip(mapped_action, self.low_bound, self.high_bound)
+        mapped_action = self.action_space.low + (action - (-1.0)) * (
+            (self.action_space.high - self.action_space.low) / 2.0)
+        mapped_action = np.clip(mapped_action, self.action_space.low, self.action_space.high)
         action_out, current_image = self.env.step(mapped_action)
         bounded_image = None
         numpy_rgb_image = None

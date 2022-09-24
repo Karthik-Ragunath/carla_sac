@@ -104,34 +104,24 @@ def main():
     last_save_steps = 0
     test_flag = 0
 
-    obs_list = train_env.reset()
-    print("OLD OBSERVATION LIST:", obs_list)
+    obs = train_env.reset()
+    print("OLD OBSERVATION LIST:", obs)
     while total_steps < args.train_total_steps:
         # Train episode
 
         # if rpm.size() < WARMUP_STEPS:
         if 5 < 2:
             print("@"*20, "WARMUP STEP", "@"*20)
-            action_list = [
-                np.random.uniform(-1, 1, size=action_dim)
-                for _ in range(1)
-            ]
+            action = np.random.uniform(-1, 1, size=action_dim)
         else:
-            print("ALREADY WARMED UP")
-            action_list = []
-            for obs in obs_list:
-                action_list.append(agent.sample(obs))
+            action = agent.sample(obs)
             # action_list = [agent.sample(obs) for obs in obs_list]
-            print("Action List Returned In Train:", action_list)
+            print("Action List Returned In Train:", action)
 
 
-        next_obs_list, reward_list, done_list, info_list, next_obs_rgb_list = train_env.step(
-            action_list)
+        next_obs, reward, done, info, next_obs_rgb = train_env.step(action)
 
-        # Store data in replay memory
-        for i in range(1):
-            rpm.append(obs_list[i], action_list[i], reward_list[i],
-                       next_obs_rgb_list[i], done_list[i])
+        rpm.append(obs, action, reward, next_obs_rgb, done)
 
         obs_list = train_env.get_obs()
         total_steps = train_env.total_steps
