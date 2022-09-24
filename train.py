@@ -103,7 +103,6 @@ def main():
     total_steps = 0
     last_save_steps = 0
     test_flag = 0
-
     obs = train_env.reset()
     print("OLD OBSERVATION LIST:", obs)
     while total_steps < args.train_total_steps:
@@ -117,7 +116,6 @@ def main():
             action = agent.sample(obs)
             # action_list = [agent.sample(obs) for obs in obs_list]
             print("Action List Returned In Train:", action)
-
 
         next_obs, reward, done, info, next_obs_rgb = train_env.step(action)
 
