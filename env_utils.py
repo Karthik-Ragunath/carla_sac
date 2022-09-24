@@ -43,7 +43,7 @@ class ParallelEnv(object):
         self.reward = return_list[1]
         self.done = return_list[2]
         self.info = return_list[3]
-        self.next_obs_rgb = (numpy_rgb_image, bounding_box_image)
+        self.next_obs_rgb = np.array((numpy_rgb_image, bounding_box_image))
         # self.next_waypoint_obs = np.array(self.next_waypoint_obs, dtype=object)
         # self.reward = np.array(self.reward, dtype=object)
         # self.done = np.array(self.done, dtype=object)
