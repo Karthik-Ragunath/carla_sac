@@ -209,18 +209,24 @@ class CarlaEnv(gym.Env):
                 '''
 
                 current_location = self.ego.get_location()
-                print("^" * 30, "Current Location:", current_location, "^" * 30)
                 waypoint_info = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True)
-                print("#" * 30, 'waypoint info:', waypoint_info, "#" * 30)
                 waypoint_info_lane = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True, lane_type=carla.LaneType.Any)
-                print('@' * 30, 'Waypoint Lane Info:', waypoint_info_lane, '@' * 30)
                 ego_location = self.ego.get_transform().location
-                print("Ego Transformed Location:", ego_location)
                 bounding_box = self.ego.bounding_box
-                print("Bounding Box:", bounding_box)
-                bounding_box_transform = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
-                print("Bounding Box Transform:", bounding_box_transform)
+                bounding_box_coordinates = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
 
+                in_road_percentage = 0
+                in_driving_lane_percentage = 0
+                for box_coordinate in bounding_box_coordinates:
+                    is_in_road = self.map.get_waypoint(location=box_coordinate, project_to_road=False)
+                    is_in_driving_lane = self.map.get_waypoint(location=box_coordinate, project_to_road=False, lane_type=carla.LaneType.Any)
+                    if is_in_road:
+                        in_road_percentage += 1
+                    if is_in_driving_lane:
+                        in_driving_lane_percentage += 1
+                in_road_percentage = in_road_percentage / 8
+                in_driving_lane_percentage = in_driving_lane_percentage / 8
+                    
                 time.sleep(3)
                 self.collision_hist = []
 
