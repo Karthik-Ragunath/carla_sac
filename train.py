@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
-from parl.utils import logger, tensorboard, ReplayMemory
+from parl.utils import logger, tensorboard
+from replay_memory import ReplayMemory
 from env_utils import ParallelEnv, LocalEnv
 from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
 from env_config import EnvConfig
