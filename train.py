@@ -113,6 +113,7 @@ def main():
                 model_framework=args.framework, current_steps=total_steps, train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
         
+        
         #logger.info('----------- Step 3 ------------')
         # Evaluate episode
         if (total_steps + 1) // args.test_every_steps >= test_flag:
@@ -124,7 +125,7 @@ def main():
             logger.info(
                 'Total steps {}, Evaluation over {} episodes, Average reward: {}'
                 .format(total_steps, EVAL_EPISODES, avg_reward))
-        
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
