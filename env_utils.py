@@ -13,12 +13,14 @@ import os
 sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/')
 from torch_base import DetectBoundingBox
 
-class ParallelEnv(object):
+class Env(object):
     def __init__(self, env_name, train_envs_params):
         self.env = CarlaEnv(env_name=env_name, params=train_envs_params)
         self.episode_reward = 0
         self.episode_steps = 0
         self._max_episode_steps = train_envs_params['max_time_episode']
+        self.obs_dim = self.env.env.observation_space.shape[0]
+        self.action_dim = self.env.env.action_space.shape[0]
         self.total_steps = 0
 
     def reset(self):

@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 from parl.utils import logger, tensorboard
 from replay_memory import ReplayMemory
-from env_utils import ParallelEnv, LocalEnv
+from env_utils import Env, LocalEnv
 from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
 from env_config import EnvConfig
 import matplotlib.pyplot as plt
@@ -35,31 +35,18 @@ def to_rgb_array(image):
     return array
 
 # Runs policy for 3 episodes by default and returns average reward
-def run_evaluate_episodes(agent, env, eval_episodes):
+def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
     avg_reward = 0.
     for k in range(eval_episodes):
-        obs, train_image = env.reset()
-        if train_image:
-            print("*" * 25, "RUN EPISODE - RESET", "*" * 25)
-            numpy_rgb_image = to_rgb_array(train_image)
-            plt.imshow(numpy_rgb_image)
-            plt.savefig("carla_rgb_sensor_flow_detected/" + str(train_image.frame) + '.png')
-            detect_bounding_box_obj = DetectBoundingBox(numpy_rgb_image.copy(), str(train_image.frame))
-            bounding_box_image = detect_bounding_box_obj.detect_bounding_boxes()
+        obs = env.reset()
         done = False
         steps = 0
         while not done and steps < env._max_episode_steps:
             steps += 1
-            action = agent.predict(numpy_rgb_image, bounding_box_image)
-            step_tuple, train_image = env.step(action)
-            if train_image:
-                numpy_rgb_image = to_rgb_array(train_image)
-                plt.imshow(numpy_rgb_image)
-                plt.savefig("carla_rgb_sensor_flow_detected/" + str(train_image.frame) + '.png')
-                detect_bounding_box_obj = DetectBoundingBox(numpy_rgb_image.copy(), str(train_image.frame))
-                bounding_box_image = detect_bounding_box_obj.detect_bounding_boxes()
-            obs, reward, done, _ = step_tuple
+            action = agent.predict(obs)
+            next_obs, reward, done, info, next_obs_rgb = env.step(action)
             avg_reward += reward
+            obs = next_obs_rgb
     avg_reward /= eval_episodes
     return avg_reward
 
@@ -70,11 +57,11 @@ def main():
 
     # Parallel environments for training
     train_envs_params = EnvConfig['train_envs_params']
-    train_env = ParallelEnv(args.env, train_envs_params)
+    train_env = Env(args.env, train_envs_params)
 
     # env for eval
     eval_env_params = EnvConfig['eval_env_params']
-    eval_env = LocalEnv(args.env, eval_env_params)
+    eval_env = Env(args.env, eval_env_params)
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
 
@@ -118,7 +105,7 @@ def main():
                         batch_terminal)
         print("-------------------------")
 
-        #logger.info('----------- Step 2 ------------')
+        # logger.info('----------- Step 2 ------------')
         # Save agent
         # if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
         if total_steps > int(1) and total_steps > last_save_steps + int(20):
