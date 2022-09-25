@@ -74,21 +74,13 @@ def main():
 
     # env for eval
     eval_env_params = EnvConfig['eval_env_params']
-
-    print("Eval Env Params:", eval_env_params)
-
     eval_env = LocalEnv(args.env, eval_env_params)
-
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
-
-    print("Obs Dim:", obs_dim, "Action Dim:", action_dim)
-
 
     # Initialize model, algorithm, agent, replay_memory
     CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
     model = CarlaModel(obs_dim, action_dim)
-    print("Model Created")
     algorithm = SAC(
         model,
         gamma=GAMMA,
@@ -96,44 +88,32 @@ def main():
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
-    print("Algorithm Initialized")
     agent = CarlaAgent(algorithm)
     rpm = ReplayMemory(
         max_size=MEMORY_SIZE, obs_dim=obs_dim, act_dim=action_dim)
 
     total_steps = 0
     last_save_steps = 0
-    test_flag = 0
     obs = train_env.reset()
-    print("OLD OBSERVATION LIST:", obs)
     while total_steps < args.train_total_steps:
         # Train episode
-
-        # if rpm.size() < WARMUP_STEPS:
-        if 5 < 2:
-            print("@"*20, "WARMUP STEP", "@"*20)
+        if rpm.size() < WARMUP_STEPS:
             action = np.random.uniform(-1, 1, size=action_dim)
         else:
             action = agent.sample(obs)
-            # action_list = [agent.sample(obs) for obs in obs_list]
-            print("Action List Returned In Train:", action)
 
         next_obs, reward, done, info, next_obs_rgb = train_env.step(action)
 
         rpm.append(obs, action, reward, next_obs_rgb, done)
 
-        obs_list = train_env.get_obs()
+        obs = train_env.get_obs()
         total_steps = train_env.total_steps
-        # print("NEW OBS LIST:", obs_list)
-        # break
 
         #logger.info('----------- Step 1 ------------')
         # Train agent after collecting sufficient data
-        # if rpm.size() >= WARMUP_STEPS:
-        if 5 > 2:
+        if rpm.size() >= WARMUP_STEPS:
             batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = rpm.sample_batch(
                 BATCH_SIZE)
-            print("BATCH SAMPLED")
             agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
                         batch_terminal)
         print("-------------------------")
@@ -141,11 +121,11 @@ def main():
         #logger.info('----------- Step 2 ------------')
         # Save agent
         # if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
-        if total_steps > int(1) and total_steps > last_save_steps + int(2):
+        if total_steps > int(1) and total_steps > last_save_steps + int(20):
             agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
                 model_framework=args.framework, current_steps=total_steps, train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
-        '''
+        
         #logger.info('----------- Step 3 ------------')
         # Evaluate episode
         if (total_steps + 1) // args.test_every_steps >= test_flag:
@@ -157,7 +137,7 @@ def main():
             logger.info(
                 'Total steps {}, Evaluation over {} episodes, Average reward: {}'
                 .format(total_steps, EVAL_EPISODES, avg_reward))
-        '''
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -146,9 +146,6 @@ class CarlaEnv(object):
         numpy_rgb_image = None
         if current_image:
             numpy_rgb_image = self.to_rgb_array(current_image)
-            plt.imshow(numpy_rgb_image)
-            plt.savefig("/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rgb_sensor_flow_detected/" + str(current_image.frame) + '.png')
-            print("$" * 25, "RESET Image Name:", str(current_image.frame), "$" * 25)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
             plt.imshow(bounded_image)
