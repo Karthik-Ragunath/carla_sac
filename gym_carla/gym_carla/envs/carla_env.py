@@ -99,14 +99,11 @@ class CarlaEnv(gym.Env):
 
         # store current image
         self.current_image = None
-        print("Just to make sure")
-        print("Carla Init Executed Now")
 
     def reset(self):
         # print("carla_env.py reset function called")
         while True:
             try:
-                print("Came inside reset")
                 self.collision_sensor = None
                 self.lane_sensor = None
 
@@ -300,10 +297,6 @@ class CarlaEnv(gym.Env):
                 # self.isSuccess = False
                 self.isOutOfLane = False
                 self.isSpecialSpeed = False
-                # print("carla_env.py reset func, obs:", self._get_obs())
-                # print("carla_env.py reset func, state_info:", self.state_info)
-                # print("-" * 25, "Current Image Returned:", self.current_image.frame, "-" * 25)
-                print("Current Image:", self.current_image)
                 return self._get_obs(), copy.deepcopy(self.state_info), self.current_image
 
             except Exception as e:
@@ -625,6 +618,9 @@ class CarlaEnv(gym.Env):
         # print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
+
+    def get_reward_bounding_boxes(self):
+        pass
 
     def _make_carla_client(self, host, port):
         while True:
