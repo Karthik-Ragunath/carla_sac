@@ -100,6 +100,24 @@ class CarlaEnv(gym.Env):
         # store current image
         self.current_image = None
 
+    def compute_side_walk_opp_lane_infractions(self, bounding_box_coordinates):
+        in_road_percentage = 0
+        in_driving_lane_percentage = 0
+        for box_coordinate in bounding_box_coordinates:
+            is_in_road = self.map.get_waypoint(location=box_coordinate, project_to_road=False)
+            is_in_driving_lane = self.map.get_waypoint(location=box_coordinate, project_to_road=False, lane_type=carla.LaneType.Any)
+            if is_in_road:
+                in_road_percentage += 1
+            if is_in_driving_lane:
+                in_driving_lane_percentage += 1
+        in_road_percentage = in_road_percentage / 8
+        in_driving_lane_percentage = in_driving_lane_percentage / 8
+
+        off_road_percentage = 1 - in_road_percentage
+        off_lane_percentage = 1 - in_driving_lane_percentage
+
+        return off_road_percentage, off_lane_percentage
+
     def reset(self):
         # print("carla_env.py reset function called")
         while True:
@@ -212,17 +230,7 @@ class CarlaEnv(gym.Env):
                 bounding_box = self.ego.bounding_box
                 bounding_box_coordinates = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
 
-                in_road_percentage = 0
-                in_driving_lane_percentage = 0
-                for box_coordinate in bounding_box_coordinates:
-                    is_in_road = self.map.get_waypoint(location=box_coordinate, project_to_road=False)
-                    is_in_driving_lane = self.map.get_waypoint(location=box_coordinate, project_to_road=False, lane_type=carla.LaneType.Any)
-                    if is_in_road:
-                        in_road_percentage += 1
-                    if is_in_driving_lane:
-                        in_driving_lane_percentage += 1
-                in_road_percentage = in_road_percentage / 8
-                in_driving_lane_percentage = in_driving_lane_percentage / 8
+                self.off_road_percentage, self.off_lane_percentage = self.compute_side_walk_opp_lane_infractions(bounding_box_coordinates)
                     
                 time.sleep(3)
                 self.collision_hist = []
@@ -297,6 +305,11 @@ class CarlaEnv(gym.Env):
                 # self.isSuccess = False
                 self.isOutOfLane = False
                 self.isSpecialSpeed = False
+
+                self.previous_location = self.ego.get_transform().location
+                self.distance_travelled = 0
+                self.previous_velocity = self.ego.get_velocity()
+
                 return self._get_obs(), copy.deepcopy(self.state_info), self.current_image
 
             except Exception as e:
@@ -620,7 +633,31 @@ class CarlaEnv(gym.Env):
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
 
     def get_reward_bounding_boxes(self):
-        pass
+        # reward = 1000 * (d_cur - d_prev) + 0.05 * (v_cur - v_prev) - 0.00002 * (collision_damage_cur - collision_damage_prev) \
+        # - 2 * (side_walk_intersection_cur - side_walk_intersection_prev) - 2 * (opposite_lane_intersection_cur - opposite_lane_intersection_prev)
+        if self.isCollided:
+            reward = -500
+            return reward
+
+        current_location = self.ego.transform().location
+        distance_travelled = self.previous_location.distance(current_location)
+        self.previous_location = current_location
+
+        current_velocity = self.ego.get_velocity()
+        prev_velocity_array = np.array([self.previous_velocity.x, self.previous_velocity.y])
+        prev_velocity_norm = np.linalg.norm(prev_velocity_array)
+        curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
+        curr_velocity_norm = np.linalg.norm(curr_velocity_array)
+        velocity_diff = curr_velocity_norm - prev_velocity_norm
+
+        bounding_box_coordinates = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
+        curr_off_road_percentage, curr_off_lane_percentage = self.compute_side_walk_opp_lane_infractions(bounding_box_coordinates)
+        
+        side_walk_intersection_diff = curr_off_road_percentage - self.off_road_percentage
+        off_lane_intersection_diff = curr_off_lane_percentage - self.off_lane_percentage
+
+        reward = 1000 * distance_travelled + 0.05 * velocity_diff - 2 * side_walk_intersection_diff - 2 * off_lane_intersection_diff
+        return reward
 
     def _make_carla_client(self, host, port):
         while True:
