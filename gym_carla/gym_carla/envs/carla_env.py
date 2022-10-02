@@ -221,13 +221,15 @@ class CarlaEnv(gym.Env):
                 intersection_otherlane = measurements.player_measurements.intersection_otherlane
                 intersection_offroad = measurements.player_measurements.intersection_offroad
                 print("*"*30, "Intersection Other Lane:", intersection_otherlane, "Intersection Offroad:", intersection_offroad, "*"*30)
-                '''
 
+                # working code
                 current_location = self.ego.get_location()
                 waypoint_info = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True)
                 waypoint_info_lane = self.map.get_waypoint(location=self.ego.get_location(), project_to_road=True, lane_type=carla.LaneType.Any)
                 ego_location = self.ego.get_transform().location
                 bounding_box = self.ego.bounding_box
+                '''
+
                 bounding_box_coordinates = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
 
                 self.off_road_percentage, self.off_lane_percentage = self.compute_side_walk_opp_lane_infractions(bounding_box_coordinates)
@@ -252,65 +254,19 @@ class CarlaEnv(gym.Env):
                 self.world.tick()
                 self.world.tick()
 
-                # Get waypoint infomation
-                ego_x, ego_y = self._get_ego_pos()
-                self.current_wpt = self._get_waypoint_xyz()
-
-                delta_yaw, wpt_yaw, ego_yaw = self._get_delta_yaw()
-                road_heading = np.array([
-                    np.cos(wpt_yaw / 180 * np.pi),
-                    np.sin(wpt_yaw / 180 * np.pi)
-                ])
-                ego_heading = np.float32(ego_yaw / 180.0 * np.pi)
-                ego_heading_vec = np.array(
-                    [np.cos(ego_heading),
-                     np.sin(ego_heading)])
-
-                future_angles = self._get_future_wpt_angle(
-                    distances=self.distances)
-
-                # Update State Info (Necessary?)
-                velocity = self.ego.get_velocity()
-                accel = self.ego.get_acceleration()
-                dyaw_dt = self.ego.get_angular_velocity().z
-                v_t_absolute = np.array([velocity.x, velocity.y])
-                a_t_absolute = np.array([accel.x, accel.y])
-
-                # decompose v and a to tangential and normal in ego coordinates
-                v_t = _vec_decompose(v_t_absolute, ego_heading_vec)
-                a_t = _vec_decompose(a_t_absolute, ego_heading_vec)
-
                 # Reset action of last time step
                 # TODO:[another kind of action]
                 self.last_action = np.array([0.0, 0.0])
 
-                pos_err_vec = np.array((ego_x, ego_y)) - self.current_wpt[0:2]
-
-                self.state_info['velocity_t'] = v_t
-                self.state_info['acceleration_t'] = a_t
-
-                # self.state_info['ego_heading'] = ego_heading
-                self.state_info['delta_yaw_t'] = delta_yaw
-                self.state_info['dyaw_dt_t'] = dyaw_dt
-
-                self.state_info['lateral_dist_t'] = np.linalg.norm(pos_err_vec) * \
-                                                    np.sign(pos_err_vec[0] * road_heading[1] - \
-                                                            pos_err_vec[1] * road_heading[0])
-                self.state_info['action_t_1'] = self.last_action
-                self.state_info['angles_t'] = future_angles
-
                 # End State variable initialized
                 self.isCollided = False
                 self.isTimeOut = False
-                # self.isSuccess = False
-                self.isOutOfLane = False
-                self.isSpecialSpeed = False
 
                 self.previous_location = self.ego.get_transform().location
                 self.distance_travelled = 0
                 self.previous_velocity = self.ego.get_velocity()
 
-                return self._get_obs(), copy.deepcopy(self.state_info), self.current_image
+                return self.current_image
 
             except Exception as e:
                 self.logger.error("Env reset() error")
@@ -332,9 +288,6 @@ class CarlaEnv(gym.Env):
             # else:
             #     throttle = 0
             #     brake = -throttle_or_brake
-
-            # Ver. 2 input is the delta value of control signal
-            # TODO:[another kind of action] change the action space to [-2, 2]
             current_action = np.array(action) + self.last_action
             current_action = np.clip(
                 current_action, -1.0, 1.0)
@@ -357,47 +310,6 @@ class CarlaEnv(gym.Env):
             for _ in range(4):
                 self.world.tick()
 
-            # Get waypoint infomation
-            ego_x, ego_y = self._get_ego_pos()
-            self.current_wpt = self._get_waypoint_xyz()
-
-            delta_yaw, wpt_yaw, ego_yaw = self._get_delta_yaw()
-            road_heading = np.array(
-                [np.cos(wpt_yaw / 180 * np.pi),
-                 np.sin(wpt_yaw / 180 * np.pi)])
-            ego_heading = np.float32(ego_yaw / 180.0 * np.pi)
-            ego_heading_vec = np.array((np.cos(ego_heading),
-                                        np.sin(ego_heading)))
-
-            future_angles = self._get_future_wpt_angle(
-                distances=self.distances)
-
-            # Get dynamics info
-            velocity = self.ego.get_velocity()
-            accel = self.ego.get_acceleration()
-            dyaw_dt = self.ego.get_angular_velocity().z
-            v_t_absolute = np.array([velocity.x, velocity.y])
-            a_t_absolute = np.array([accel.x, accel.y])
-
-            # decompose v and a to tangential and normal in ego coordinates
-            v_t = _vec_decompose(v_t_absolute, ego_heading_vec)
-            a_t = _vec_decompose(a_t_absolute, ego_heading_vec)
-
-            pos_err_vec = np.array((ego_x, ego_y)) - self.current_wpt[0:2]
-
-            self.state_info['velocity_t'] = v_t
-            self.state_info['acceleration_t'] = a_t
-
-            # self.state_info['ego_heading'] = ego_heading
-            self.state_info['delta_yaw_t'] = delta_yaw
-            self.state_info['dyaw_dt_t'] = dyaw_dt
-
-            self.state_info['lateral_dist_t'] = np.linalg.norm(pos_err_vec) * \
-                                                np.sign(pos_err_vec[0] * road_heading[1] - \
-                                                        pos_err_vec[1] * road_heading[0])
-            self.state_info['action_t_1'] = self.last_action
-            self.state_info['angles_t'] = future_angles
-
             # Update timesteps
             self.time_step += 1
             self.total_step += 1
@@ -405,17 +317,15 @@ class CarlaEnv(gym.Env):
 
             # calculate reward
             isDone = self._terminal()
-            # current_reward = self._get_reward(np.array(current_action))
             current_reward = self.get_reward_bounding_boxes()
 
-            return ((self._get_obs(), current_reward, isDone,
-                    copy.deepcopy(self.state_info)), self.current_image)
+            return current_reward, isDone, self.current_image
 
         except Exception as e:
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return ((self._get_obs(), 0.0, True, copy.deepcopy(self.state_info)), self.current_image)
+            return 0.0, True, self.current_image
 
     def render(self, mode='human'):
         pass
@@ -454,37 +364,6 @@ class CarlaEnv(gym.Env):
                               (self.time_step, self.route_id))
             self.isTimeOut = True
             # return True
-
-        # If out of lane
-        # if len(self.lane_invasion_hist) > 0:
-        if abs(self.state_info['lateral_dist_t']) > 3.6:
-            # print("lane invasion happened! Episode Done.")
-            if self.state_info['lateral_dist_t'] > 0:
-                self.logger.debug(
-                    'Left Lane invasion! Episode cost %d steps in route %d.' %
-                    (self.time_step, self.route_id))
-            else:
-                self.logger.debug(
-                    'Right Lane invasion! Episode cost %d steps in route %d.' %
-                    (self.time_step, self.route_id))
-            self.isOutOfLane = True
-            return True
-
-        # If speed is special
-        velocity = self.ego.get_velocity()
-        v_norm = np.linalg.norm(np.array((velocity.x, velocity.y)))
-        if v_norm < 4:
-            self.logger.debug(
-                'Speed too slow! Episode cost %d steps in route %d.' %
-                (self.time_step, self.route_id))
-            self.isSpecialSpeed = True
-            return True
-        elif v_norm > (1.5 * self.desired_speed):
-            self.logger.debug(
-                'Speed too fast! Episode cost %d steps in route %d.' %
-                (self.time_step, self.route_id))
-            self.isSpecialSpeed = True
-            return True
 
         return False
 
@@ -584,14 +463,6 @@ class CarlaEnv(gym.Env):
             self.actors.append(vehicle)
             return True
         return False
-
-    def _get_obs(self):
-        # [img version]
-        # current_obs = self.camera_img[36:, :, :].copy()
-        # return np.float32(current_obs / 255.0)
-        print("GET OBS CALLED")
-        # [vec version] # observation currently from waypoint vec, must change it to camera sensor to work with traffic
-        return np.float32(self._info2normalized_state_vector())
 
     def _get_reward(self, action):
         """
