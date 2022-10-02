@@ -104,7 +104,7 @@ def main():
                 BATCH_SIZE)
             agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
                         batch_terminal)
-        print("-------------------------")
+        # print("-------------------------")
 
         # logger.info('----------- Step 2 ------------')
         # Save agent
