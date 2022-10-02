@@ -27,7 +27,6 @@ class CarlaEnv(gym.Env):
     """An OpenAI gym wrapper for CARLA simulator."""
 
     def __init__(self, params):
-        # print("^" * 50, 'Came Here From Where', "^"*50)
         self.logger = setup_carla_logger(
             "output_logger", experiment_name=str(params['port']))
         self.logger.info("Env running in port {}".format(params['port']))
@@ -51,7 +50,6 @@ class CarlaEnv(gym.Env):
             low=-50.0, high=50.0, shape=(512,), dtype=np.float32)
 
         # Connect to carla server and get world object
-        # print('connecting to Carla server...')
         # self._make_carla_client('localhost', self.port)
         self._make_carla_client('127.0.0.1', self.port)
         # Load routes
@@ -178,7 +176,6 @@ class CarlaEnv(gym.Env):
                             )
                             if self._try_spawn_vehicle_at(transform_traffic):
                                 traffic_vehicles_spawned_index += 1
-                            # print("*" * 50, "No of vehicles spawned:", traffic_vehicles_spawned_index, "*" * 50)
                         break
                     else:
                         ego_spawn_times += 1
@@ -207,12 +204,12 @@ class CarlaEnv(gym.Env):
 
                 def get_camera_rgb_images(data):
                     print("RGB Sensor Detection")
-                    image_width = data.width
-                    image_height = data.height
-                    image_transform = data.transform
-                    field_of_view = data.fov
-                    raw_data = data.raw_data
-                    frame_id = data.frame
+                    # image_width = data.width
+                    # image_height = data.height
+                    # image_transform = data.transform
+                    # field_of_view = data.fov
+                    # raw_data = data.raw_data
+                    # frame_id = data.frame
                     data.save_to_disk('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/image_outputs/%.6d.jpg' % data.frame)
                     self.current_image = data
 
@@ -349,8 +346,6 @@ class CarlaEnv(gym.Env):
 
         # If collides
         if len(self.collision_hist) > 0:
-            # print("^" * 50, "Collision Happended!!!! Episode Done!!!", "^"*50)
-            # print("Collision happened! Episode Done.")
             self.logger.debug(
                 'Collision happened! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
@@ -359,11 +354,9 @@ class CarlaEnv(gym.Env):
 
         # If reach maximum timestep
         if self.time_step >= self.max_time_episode:
-            # print("Time out! Episode Done.")
             self.logger.debug('Time out! Episode cost %d steps in route %d.' %
                               (self.time_step, self.route_id))
             self.isTimeOut = True
-            # return True
 
         return False
 
@@ -402,13 +395,6 @@ class CarlaEnv(gym.Env):
                     bp.get_attribute('color').recommended_values)
             bp.set_attribute('color', color)
         return bp
-
-    def _get_ego_pos(self):
-        """Get the ego vehicle pose (x, y)."""
-        ego_trans = self.ego.get_transform()
-        ego_x = ego_trans.location.x
-        ego_y = ego_trans.location.y
-        return ego_x, ego_y
 
     def _set_carla_transform(self, pose):
         """Get a carla tranform object given pose.
@@ -463,46 +449,6 @@ class CarlaEnv(gym.Env):
             self.actors.append(vehicle)
             return True
         return False
-
-    def _get_reward(self, action):
-        """
-        calculate the reward of current state
-        params:
-            action: np.array of shape(2,)
-        """
-        # end state
-        # reward for done: collision/out/SpecislSPeed & Success
-        r_step = 10.0
-        if self.isCollided or self.isOutOfLane or self.isSpecialSpeed:
-            r_done = -500.0
-            return r_done
-        # if self.isSuccess:
-        #     r_done = 300.0
-        #     return r_done
-
-        # reward for speed
-        v = self.ego.get_velocity()
-        ego_velocity = np.array([v.x, v.y])
-        speed_norm = np.linalg.norm(ego_velocity)
-        delta_speed = speed_norm - self.desired_speed
-        r_speed = -delta_speed**2 / 5.0
-        # print("r_speed:", speed_norm)
-
-        # reward for steer
-        delta_yaw, _, _ = self._get_delta_yaw()
-        r_steer = -100 * (delta_yaw * np.pi / 180)**2
-        # print("r_steer:", delta_yaw, '------>', r_steer)
-
-        # reward for action smoothness
-        r_action_regularized = -5 * np.linalg.norm(action)**2
-        # print("r_action:", action, '------>', r_action_regularized)
-
-        # reward for lateral distance to the center of road
-        lateral_dist = self.state_info['lateral_dist_t']
-        r_lateral = -10.0 * lateral_dist**2
-        # print("r_lateral:", lateral_dist, '-------->', r_lateral)
-
-        return r_speed + r_steer + r_action_regularized + r_lateral + r_step
 
     def get_reward_bounding_boxes(self):
         # reward = 1000 * (d_cur - d_prev) + 0.05 * (v_cur - v_prev) - 0.00002 * (collision_damage_cur - collision_damage_prev) \
@@ -606,91 +552,3 @@ class CarlaEnv(gym.Env):
             transform.location.z = start[2]
 
         return transform
-
-    def _get_delta_yaw(self):
-        """
-        calculate the delta yaw between ego and current waypoint
-        """
-        current_wpt = self.map.get_waypoint(location=self.ego.get_location())
-        if not current_wpt:
-            self.logger.error('Fail to find a waypoint')
-            wpt_yaw = self.current_wpt[2] % 360
-        else:
-            wpt_yaw = current_wpt.transform.rotation.yaw % 360
-        ego_yaw = self.ego.get_transform().rotation.yaw % 360
-
-        delta_yaw = ego_yaw - wpt_yaw
-        if 180 <= delta_yaw and delta_yaw <= 360:
-            delta_yaw -= 360
-        elif -360 <= delta_yaw and delta_yaw <= -180:
-            delta_yaw += 360
-
-        return delta_yaw, wpt_yaw, ego_yaw
-
-    def _get_waypoint_xyz(self):
-        """
-        Get the (x,y) waypoint of current ego position
-            if t != 0 and None, return the wpt of last moment
-            if t == 0 and None wpt: return self.starts
-        """
-        waypoint = self.map.get_waypoint(location=self.ego.get_location())
-        if waypoint:
-            return np.array(
-                (waypoint.transform.location.x, waypoint.transform.location.y,
-                 waypoint.transform.rotation.yaw))
-        else:
-            return self.current_wpt
-
-    def _get_future_wpt_angle(self, distances):
-        """
-        Get next wpts in distances
-        params:
-            distances: list of int/float, the dist of wpt which user wants to get
-        return:
-            future_angles: np.array, <current_wpt, wpt(dist_i)> correspond to the dist in distances
-        """
-        angles = []
-        current_wpt = self.map.get_waypoint(location=self.ego.get_location())
-        if not current_wpt:
-            self.logger.error('Fail to find a waypoint')
-            current_road_heading = self.current_wpt[3]
-        else:
-            current_road_heading = current_wpt.transform.rotation.yaw
-
-        for d in distances:
-            wpt_heading = current_wpt.next(d)[0].transform.rotation.yaw
-            delta_heading = delta_angle_between(current_road_heading,
-                                                wpt_heading)
-            angles.append(delta_heading)
-
-        return np.array(angles, dtype=np.float32)
-
-    def _info2normalized_state_vector(self):
-        '''
-        params: dict of ego state(velocity_t, accelearation_t, dist, command, delta_yaw_t, dyaw_dt_t)
-        type: np.array
-        return: array of size[9,], torch.Tensor (v_x, v_y, a_x, a_y
-                                                 delta_yaw, dyaw, d_lateral, action_last,
-                                                 future_angles)
-        '''
-        velocity_t = self.state_info['velocity_t']
-        accel_t = self.state_info['acceleration_t']
-
-        delta_yaw_t = np.array(self.state_info['delta_yaw_t']).reshape(
-            (1, )) / 2.0
-        dyaw_dt_t = np.array(self.state_info['dyaw_dt_t']).reshape((1, )) / 5.0
-
-        lateral_dist_t = self.state_info['lateral_dist_t'].reshape(
-            (1, )) * 10.0
-        action_last = self.state_info['action_t_1'] * 10.0
-
-        future_angles = self.state_info['angles_t'] / 2.0
-
-        info_vec = np.concatenate([
-            velocity_t, accel_t, delta_yaw_t, dyaw_dt_t, lateral_dist_t,
-            action_last, future_angles
-        ],
-                                  axis=0)
-        info_vec = info_vec.squeeze()
-
-        return info_vec
