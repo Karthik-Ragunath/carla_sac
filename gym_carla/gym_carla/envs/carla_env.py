@@ -86,14 +86,8 @@ class CarlaEnv(gym.Env):
         self.reset_step = 0
         self.total_step = 0
 
-        # A dict used for storing state data
-        self.state_info = {}
-
         # A list stores the ids for each episode
         self.actors = []
-
-        # Future distances to get heading
-        self.distances = [1., 5., 10.]
 
         # store current image
         self.current_image = None

@@ -4,9 +4,8 @@ from torch.distributions import Normal
 import torch.nn.functional as F
 from copy import deepcopy
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
 
 __all__ = ['TorchSAC']
 epsilon = 1e-6
