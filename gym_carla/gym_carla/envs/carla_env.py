@@ -405,7 +405,8 @@ class CarlaEnv(gym.Env):
 
             # calculate reward
             isDone = self._terminal()
-            current_reward = self._get_reward(np.array(current_action))
+            # current_reward = self._get_reward(np.array(current_action))
+            current_reward = self.get_reward_bounding_boxes()
 
             return ((self._get_obs(), current_reward, isDone,
                     copy.deepcopy(self.state_info)), self.current_image)
