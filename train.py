@@ -8,8 +8,8 @@ from env_config import EnvConfig
 import matplotlib.pyplot as plt
 from torch_base import DetectBoundingBox
 
-WARMUP_STEPS = 2e3
-EVAL_EPISODES = 3
+WARMUP_STEPS = 1
+EVAL_EPISODES = 1
 # MEMORY_SIZE = int(1e4)
 # BATCH_SIZE = 256
 BATCH_SIZE = 5

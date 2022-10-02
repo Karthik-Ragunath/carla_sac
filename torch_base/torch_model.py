@@ -79,13 +79,13 @@ class Actor(parl.Model):
         x_cnn_orig = self.max_pool_layer_1(x_cnn_orig)
         # x_cnn_orig = torch.unsqueeze(torch.flatten(x_cnn_orig), dim=0)
         x_cnn_orig = torch.flatten(x_cnn_orig, start_dim=1)
-        print("ACTOR - FORWARD SHAPE:", x_cnn_orig.size())
+        # print("ACTOR - FORWARD SHAPE:", x_cnn_orig.size())
 
         x_cnn_orig = F.relu(self.fully_connected_layer_1_1(x_cnn_orig))
         x_cnn_orig = F.relu(self.fully_connected_layer_1_2(x_cnn_orig))
         x_cnn_orig = F.relu(self.fully_connected_layer_1_3(x_cnn_orig))
 
-        print("X-Orig shape after passing through fully connected layers:", x_cnn_orig.size())
+        # print("X-Orig shape after passing through fully connected layers:", x_cnn_orig.size())
 
         # Bounding Box Image - CNN
         x_faster_rcnn = F.relu(self.cnn_layer_2_1(bounding_box_image))
@@ -102,9 +102,9 @@ class Actor(parl.Model):
         x_faster_rcnn = F.relu(self.fully_connected_layer_2_2(x_faster_rcnn))
         x_faster_rcnn = F.relu(self.fully_connected_layer_2_3(x_faster_rcnn))
 
-        print("FORWARD:", "orig_shape -", x_cnn_orig.size(), "faster_rcnn_shape -", x_faster_rcnn.size())
+        # print("FORWARD:", "orig_shape -", x_cnn_orig.size(), "faster_rcnn_shape -", x_faster_rcnn.size())
         fusion = torch.cat((x_cnn_orig, x_faster_rcnn), 1)
-        print("FUSION SHAPE:", fusion.size())
+        # print("FUSION SHAPE:", fusion.size())
         fusion = F.relu(self.fusion_fully_connected_layer_1(fusion))
         fusion = F.relu(self.fusion_fully_connected_layer_2(fusion))
 

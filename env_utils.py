@@ -37,8 +37,8 @@ class Env(object):
     def step(self, action):
         return_tuple = self.env.step(action)
         return_list, numpy_rgb_image, bounding_box_image = return_tuple
-        if numpy_rgb_image.any():
-            print("Image Does Exists")
+        # if numpy_rgb_image.any():
+            # print("Image Does Exists")
         self.reward = return_list[0]
         self.done = return_list[1]
         self.next_obs_rgb = np.array((numpy_rgb_image, bounding_box_image))
@@ -148,9 +148,9 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            plt.imshow(bounded_image)
-            plt.savefig("/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
-            print("Image Received In ParallelEnv Reset")
+            # plt.imshow(bounded_image)
+            # plt.savefig("/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
+            # print("Image Received In ParallelEnv Reset")
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image

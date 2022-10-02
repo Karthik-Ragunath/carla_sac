@@ -77,7 +77,7 @@ class TorchSAC(parl.Algorithm):
             next_bounded_rgb_image = next_obs[:, 1, :, :, :]
             next_rgb_image = next_rgb_image.float().permute(0, 3, 1, 2)
             next_bounded_rgb_image = next_bounded_rgb_image.float().permute(0, 3, 1, 2)
-            print("Tensor Sizes:", next_rgb_image.size(), next_bounded_rgb_image.size())
+            # print("Tensor Sizes:", next_rgb_image.size(), next_bounded_rgb_image.size())
             next_action, next_log_pro = self.sample(next_rgb_image, next_bounded_rgb_image)
             # q1_next, q2_next = self.target_model.critic_model(
             #     next_obs, next_action)
