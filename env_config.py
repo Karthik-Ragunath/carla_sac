@@ -6,7 +6,7 @@ from copy import deepcopy
 #      Long         200
 TASK_MODE = 'Lane'
 # MAX_EPISODE_STEPS = 250
-MAX_EPISODE_STEPS = 300
+MAX_EPISODE_STEPS = 35
 params = {
     # screen size of cv2 window
     'obs_size': (160, 100),
