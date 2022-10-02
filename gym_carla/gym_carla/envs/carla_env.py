@@ -319,13 +319,13 @@ class CarlaEnv(gym.Env):
             isDone = self._terminal()
             current_reward = self.get_reward_bounding_boxes()
 
-            return current_reward, isDone, self.current_image
+            return (current_reward, isDone), self.current_image
 
         except Exception as e:
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return 0.0, True, self.current_image
+            return (0.0, True), self.current_image
 
     def render(self, mode='human'):
         pass

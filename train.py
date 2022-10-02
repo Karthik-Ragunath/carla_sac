@@ -89,7 +89,7 @@ def main():
         else:
             action = agent.sample(obs)
 
-        next_obs, reward, done, info, next_obs_rgb = train_env.step(action)
+        reward, done, next_obs_rgb = train_env.step(action)
 
         rpm.append(obs, action, reward, next_obs_rgb, done)
 

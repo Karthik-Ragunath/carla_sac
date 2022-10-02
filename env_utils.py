@@ -30,7 +30,7 @@ class Env(object):
                 continue
             else:
                 break
-        obs_tup = (obs[1], obs[2])
+        obs_tup = (obs[0], obs[1])
         self.obs = np.array(obs_tup)
         return self.obs
 
@@ -39,12 +39,10 @@ class Env(object):
         return_list, numpy_rgb_image, bounding_box_image = return_tuple
         if numpy_rgb_image.any():
             print("Image Does Exists")
-        self.next_waypoint_obs = return_list[0]
-        self.reward = return_list[1]
-        self.done = return_list[2]
-        self.info = return_list[3]
+        self.reward = return_list[0]
+        self.done = return_list[1]
         self.next_obs_rgb = np.array((numpy_rgb_image, bounding_box_image))
-        return self.next_waypoint_obs, self.reward, self.done, self.info, self.next_obs_rgb
+        return self.reward, self.done, self.next_obs_rgb
 
     def get_obs(self):
         self.total_steps += 1
@@ -143,7 +141,7 @@ class CarlaEnv(object):
         return array
 
     def reset(self):
-        obs, _, current_image = self.env.reset()
+        current_image = self.env.reset()
         bounded_image = None
         numpy_rgb_image = None
         if current_image:
@@ -155,7 +153,7 @@ class CarlaEnv(object):
             print("Image Received In ParallelEnv Reset")
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
-        return obs, numpy_rgb_image, bounded_image
+        return numpy_rgb_image, bounded_image
 
     def step(self, action):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
