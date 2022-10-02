@@ -197,7 +197,6 @@ class CarlaEnv(gym.Env):
                         self.collision_hist.pop(0)
 
                 def get_camera_rgb_images(data):
-                    print("RGB Sensor Detection")
                     # image_width = data.width
                     # image_height = data.height
                     # image_transform = data.transform
@@ -451,7 +450,7 @@ class CarlaEnv(gym.Env):
             reward = -500
             return reward
 
-        current_location = self.ego.transform().location
+        current_location = self.ego.get_transform().location
         distance_travelled = self.previous_location.distance(current_location)
         self.previous_location = current_location
 
@@ -461,12 +460,16 @@ class CarlaEnv(gym.Env):
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
         velocity_diff = curr_velocity_norm - prev_velocity_norm
+        self.previous_velocity = current_velocity
 
         bounding_box_coordinates = self.ego.bounding_box.get_world_vertices(self.ego.get_transform())
         curr_off_road_percentage, curr_off_lane_percentage = self.compute_side_walk_opp_lane_infractions(bounding_box_coordinates)
         
         side_walk_intersection_diff = curr_off_road_percentage - self.off_road_percentage
         off_lane_intersection_diff = curr_off_lane_percentage - self.off_lane_percentage
+
+        self.off_road_percentage = curr_off_road_percentage
+        self.off_lane_percentage = curr_off_lane_percentage
 
         reward = 1000 * distance_travelled + 0.05 * velocity_diff - 2 * side_walk_intersection_diff - 2 * off_lane_intersection_diff
         return reward

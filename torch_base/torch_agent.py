@@ -9,8 +9,8 @@ class TorchAgent(parl.Agent):
     def __init__(self, algorithm):
         super(TorchAgent, self).__init__(algorithm)
         # print("TorchAgent Called")
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # self.device = "cpu"
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = "cpu"
         self.alg.sync_target(decay=0)
 
     def predict(self, obs):

@@ -58,7 +58,7 @@ class Env(object):
             self.episode_steps = 0
             self.episode_reward = 0
             obs_from_reset = self.env.reset()
-            obs = (obs_from_reset[1], obs_from_reset[2])
+            obs = (obs_from_reset[0], obs_from_reset[1])
             self.obs = np.array(obs)
         else:
             print("EPISODE NOT DONE - CONTINUING")

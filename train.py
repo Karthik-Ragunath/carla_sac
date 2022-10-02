@@ -44,7 +44,7 @@ def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
         while not done and steps < env._max_episode_steps:
             steps += 1
             action = agent.predict(obs)
-            next_obs, reward, done, info, next_obs_rgb = env.step(action)
+            reward, done, next_obs_rgb = env.step(action)
             avg_reward += reward
             obs = next_obs_rgb
     avg_reward /= eval_episodes
@@ -81,6 +81,7 @@ def main():
 
     total_steps = 0
     last_save_steps = 0
+    test_flag = 0
     obs = train_env.reset()
     while total_steps < args.train_total_steps:
         # Train episode
