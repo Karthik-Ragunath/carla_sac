@@ -61,7 +61,8 @@ class Env(object):
             obs = (obs_from_reset[0], obs_from_reset[1])
             self.obs = np.array(obs)
         else:
-            print("EPISODE NOT DONE - CONTINUING")
+            # print("EPISODE NOT DONE - CONTINUING")
+            pass
         return self.obs
 
 
