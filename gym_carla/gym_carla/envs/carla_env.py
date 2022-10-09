@@ -41,7 +41,10 @@ class CarlaEnv(gym.Env):
 
         self.desired_speed = params['desired_speed']
         self.max_ego_spawn_times = params['max_ego_spawn_times']
+        # TODO : Reset Traffic
+        '''
         self.max_traffic_vehicles = params['max_traffic_vehicles']
+        '''
 
         # action and observation space
         self.action_space = spaces.Box(
@@ -60,9 +63,12 @@ class CarlaEnv(gym.Env):
         self.ego_bp = self._create_vehicle_bluepprint(
             params['ego_vehicle_filter'], color='49,8,8')
 
+        # TODO : Reset Traffic
+        '''
         # Create traffic vehicles (other than ego vehicles)
         self.traffic_bp = self._create_vehicle_bluepprint(
             params['traffic_vehicle_filter'], color='0,0,0')
+        '''
 
         # Collision sensor
         self.collision_hist = []  # The collision history
@@ -159,17 +165,19 @@ class CarlaEnv(gym.Env):
                             transform=transform)
 
                     if self._try_spawn_ego_vehicle_at(transform):
+                        # TODO : Reset Traffic
                         # code component to spawn traffic vehicles
-
-                        traffic_vehicles_spawned_index = 0
-                        while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
-                            transform_traffic = self._get_random_position_between(
-                                start=self.start,
-                                dest=self.dest,
-                                transform=transform
-                            )
-                            if self._try_spawn_vehicle_at(transform_traffic):
-                                traffic_vehicles_spawned_index += 1
+                        '''
+                        # traffic_vehicles_spawned_index = 0
+                        # while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
+                        #     transform_traffic = self._get_random_position_between(
+                        #         start=self.start,
+                        #         dest=self.dest,
+                        #         transform=transform
+                        #     )
+                        #     if self._try_spawn_vehicle_at(transform_traffic):
+                        #         traffic_vehicles_spawned_index += 1
+                        '''
                         break
                     else:
                         ego_spawn_times += 1
@@ -430,6 +438,8 @@ class CarlaEnv(gym.Env):
             return True
         return False
 
+    '''
+    # TODO : Reset Traffic
     def _try_spawn_vehicle_at(self, transform):
         """Try to spawn traffic vehicles at specific transform
 
@@ -443,6 +453,7 @@ class CarlaEnv(gym.Env):
             self.actors.append(vehicle)
             return True
         return False
+    '''
 
     def get_reward_bounding_boxes(self):
         # reward = 1000 * (d_cur - d_prev) + 0.05 * (v_cur - v_prev) - 0.00002 * (collision_damage_cur - collision_damage_prev) \
