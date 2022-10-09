@@ -50,4 +50,3 @@ coverage.xml
 docs/_build/
 
 # pytorch models
-*.pth
