@@ -18,8 +18,11 @@ device = "cpu"
 model = create_model(num_classes=5).to(device)
 print("1" * 50)
 model.load_state_dict(torch.load(
-    '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base/pretrained_model/model10.pth', map_location=device
+    os.path.join(os.getcwd(), 'torch_base/pretrained_model/model10.pth'), map_location=device
 ))
+# model.load_state_dict(torch.load(
+#     '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base/pretrained_model/model10.pth', map_location=device
+# ))
 model.eval()
 # classes: 0 index is reserved for background
 CLASSES = [
