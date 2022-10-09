@@ -203,7 +203,6 @@ class CarlaEnv(gym.Env):
                     # field_of_view = data.fov
                     # raw_data = data.raw_data
                     # frame_id = data.frame
-                    # data.save_to_disk('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/image_outputs/%.6d.jpg' % data.frame)
                     # image_outputs_dir = os.path.join(os.getcwd(), "image_outputs")
                     # data.save_to_disk(image_outputs_dir + '/%.6d.jpg' % data.frame)
                     self.current_image = data
