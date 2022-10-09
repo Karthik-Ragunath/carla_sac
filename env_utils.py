@@ -52,15 +52,15 @@ class Env(object):
         self.episode_reward += self.reward
         self.obs = self.next_obs_rgb
         if self.done or self.episode_steps >= self._max_episode_steps:
-            # TODO : Change to save every 100 episode
-            if self.episode_count % 2 == 0:
+            # TODO : Change to save every 15 episode
+            if self.episode_count % 15 == 0:
                 self.episode_count += 1
                 self.env.save_episode = True
                 self.env.episode_num = self.episode_count
                 dir_path = os.path.join(os.getcwd(), 'image_outputs', str(self.env.episode_num))
                 if os.path.exists(dir_path):
                     shutil.rmtree(dir_path)
-                os.path.mkdir(dir_path)
+                os.mkdir(dir_path)
             else:
                 self.episode_count += 1
                 self.env.save_episode = False
