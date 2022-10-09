@@ -10,7 +10,7 @@ from PIL import Image
 import time
 import sys
 import os
-sys.path.append('/media/karthikragunath/Personal-Data/carla_sac/')
+# sys.path.append('/media/karthikragunath/Personal-Data/carla_sac/')
 from torch_base import DetectBoundingBox
 
 class Env(object):
