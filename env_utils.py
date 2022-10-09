@@ -10,6 +10,7 @@ from PIL import Image
 import time
 import sys
 import os
+import shutil
 # sys.path.append('/media/karthikragunath/Personal-Data/carla_sac/')
 from torch_base import DetectBoundingBox
 
@@ -22,6 +23,7 @@ class Env(object):
         self.obs_dim = self.env.env.observation_space.shape[0]
         self.action_dim = self.env.env.action_space.shape[0]
         self.total_steps = 0
+        self.episode_count = 0
 
     def reset(self):
         while True:
@@ -50,6 +52,19 @@ class Env(object):
         self.episode_reward += self.reward
         self.obs = self.next_obs_rgb
         if self.done or self.episode_steps >= self._max_episode_steps:
+            # TODO : Change to save every 100 episode
+            if self.episode_count % 2 == 0:
+                self.episode_count += 1
+                self.env.save_episode = True
+                self.env.episode_num = self.episode_count
+                dir_path = os.path.join(os.getcwd(), 'image_outputs', str(self.env.episode_num))
+                if os.path.exists(dir_path):
+                    shutil.rmtree(dir_path)
+                os.path.mkdir(dir_path)
+            else:
+                self.episode_count += 1
+                self.env.save_episode = False
+                self.env.episode_num = -1
             tensorboard.add_scalar('train/episode_reward',
                                     self.episode_reward,
                                     self.total_steps)
@@ -126,6 +141,8 @@ class CarlaEnv(object):
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
             self.env.action_space.high, self.env.action_space.shape)
+        self.save_episode = False
+        self.episode_num = -1
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -149,9 +166,11 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            # plt.imshow(bounded_image)
-            # plt.savefig("/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
-            # print("Image Received In ParallelEnv Reset")
+            if self.save_episode:
+                fig = plt.figure()
+                plt.imshow(bounded_image)
+                plt.savefig(os.path.join(os.getcwd(), 'image_outputs', str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
@@ -169,6 +188,11 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
+            if self.save_episode:
+                fig = plt.figure()
+                plt.imshow(bounded_image)
+                plt.savefig(os.path.join(os.getcwd(), 'image_outputs', str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")
         return action_out, numpy_rgb_image, bounded_image
