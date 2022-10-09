@@ -109,7 +109,7 @@ def main():
         # logger.info('----------- Step 2 ------------')
         # Save agent
         # if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
-        if total_steps > int(1) and total_steps > last_save_steps + int(5):
+        if total_steps > int(1) and total_steps > last_save_steps + int(500):
             agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
                 model_framework=args.framework, current_steps=total_steps, train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test_every_steps",
         # default=1e3,
-        default=35,
+        default=250,
         type=int,
         help='the step interval between two consecutive evaluations')
     args = parser.parse_args()
