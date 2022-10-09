@@ -6,8 +6,8 @@ from faster_rcnn_model import create_model
 import matplotlib.pyplot as plt
 
 # set the computation device
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
 # load the model and the trained weights
 model = create_model(num_classes=5).to(device)
 print("1" * 50)
