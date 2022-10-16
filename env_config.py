@@ -38,6 +38,7 @@ train_code_mode = 'train'
 train_envs_params = deepcopy(params)
 train_envs_params['port'] = train_env_port
 train_envs_params['code_mode'] = train_code_mode
+train_envs_params['load_recent_model'] = True
 
 # evaluate env params
 eval_port = 2027

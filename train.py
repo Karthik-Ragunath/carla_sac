@@ -4,11 +4,14 @@ from parl.utils import logger, tensorboard
 from replay_memory import ReplayMemory
 from env_utils import Env, LocalEnv
 from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
+import torch
+import os
 from env_config import EnvConfig
 import matplotlib.pyplot as plt
 from torch_base import DetectBoundingBox
+import glob
 
-WARMUP_STEPS = 1
+WARMUP_STEPS = 30
 EVAL_EPISODES = 1
 # MEMORY_SIZE = int(1e4)
 # BATCH_SIZE = 256
@@ -75,6 +78,23 @@ def main():
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
+    pretrained_steps = 0
+    if train_envs_params.get('load_recent_model', False):
+        # set the computation device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        filenames = glob.glob("torch_model_rgb_images_training/*.ckpt")
+        model_filename = None
+        max_train_epoch = 0
+        for filename in filenames:
+            epoch_num = int(filename.split('/')[-1].split('_')[1])
+            if epoch_num > max_train_epoch:
+                max_train_epoch = epoch_num
+                model_filename = filename
+                pretrained_steps = max_train_epoch
+        if model_filename:
+            model.load_state_dict(torch.load(
+                os.path.join(os.getcwd(), model_filename), map_location=device
+            ))
     agent = CarlaAgent(algorithm)
     rpm = ReplayMemory(
         max_size=MEMORY_SIZE, obs_dim=obs_dim, act_dim=action_dim)
@@ -111,7 +131,7 @@ def main():
         # if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
         if total_steps > int(1) and total_steps > last_save_steps + int(500):
             agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
-                model_framework=args.framework, current_steps=total_steps, train_context=EnvConfig['train_context']))
+                model_framework=args.framework, current_steps=(total_steps + pretrained_steps), train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
         
         
