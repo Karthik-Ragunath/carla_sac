@@ -138,11 +138,13 @@ class CarlaEnv(gym.Env):
                     self.route_id = 1  #np.random.randint(2, 4)
                 elif self.task_mode == 'Long' or self.task_mode == 'Lane' or self.task_mode == 'Lane_test':
                     if self.code_mode == 'train':
-                        self.route_id = np.random.randint(0, 4)
+                        # self.route_id = np.random.randint(0, 4)
+                        self.route_id = 1
                     elif self.code_mode == 'test':
-                        self.route_id = self.route_deterministic_id
-                        self.route_deterministic_id = (
-                            self.route_deterministic_id + 1) % 4
+                        # self.route_id = self.route_deterministic_id
+                        # self.route_deterministic_id = (
+                        #     self.route_deterministic_id + 1) % 4
+                        self.route_id = 1
                 elif self.task_mode == 'U_curve':
                     self.route_id = 0
                 self.start = self.starts[self.route_id]
@@ -158,12 +160,13 @@ class CarlaEnv(gym.Env):
                         self.reset()
                     transform = self._set_carla_transform(self.start)
                     # Code_mode == train, spawn randomly between start and destination
+                    '''
                     if self.code_mode == 'train':
                         transform = self._get_random_position_between(
                             start=self.start,
                             dest=self.dest,
                             transform=transform)
-
+                    '''
                     if self._try_spawn_ego_vehicle_at(transform):
                         # TODO : Reset Traffic
                         # code component to spawn traffic vehicles
