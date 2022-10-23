@@ -51,7 +51,7 @@ def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
             avg_reward += reward
             obs = next_obs_rgb
     avg_reward /= eval_episodes
-    return avg_reward
+    return avg_reward, steps
 
 
 def main():
@@ -140,12 +140,14 @@ def main():
         if (total_steps + 1) // args.test_every_steps >= test_flag:
             while (total_steps + 1) // args.test_every_steps >= test_flag:
                 test_flag += 1
-            avg_reward = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES)
+            avg_reward, num_steps = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES)
             tensorboard.add_scalar('eval/episode_reward', avg_reward,
-                                   total_steps)
+                                   total_steps + pretrained_steps)
+            tensorboard.add_scalar('eval/episode_steps', num_steps,
+                                    total_steps + pretrained_steps)
             logger.info(
-                'Total steps {}, Evaluation over {} episodes, Average reward: {}'
-                .format(total_steps, EVAL_EPISODES, avg_reward))
+                'Total steps {}, Evaluation over {} episodes, Average reward: {}, Episode steps: {}'
+                .format(total_steps + pretrained_steps, EVAL_EPISODES, avg_reward, num_steps))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -11,6 +11,7 @@ import time
 import sys
 import os
 import shutil
+
 # sys.path.append('/media/karthikragunath/Personal-Data/carla_sac/')
 from torch_base import DetectBoundingBox
 
@@ -68,7 +69,10 @@ class Env(object):
             tensorboard.add_scalar('train/episode_reward',
                                     self.episode_reward,
                                     self.total_steps)
-            logger.info('Train env done, Reward: {}'.format(self.episode_reward))
+            tensorboard.add_scalar('train/episode_steps',
+                                    self.episode_steps,
+                                    self.episode_count)
+            logger.info('Train env done, Reward: {reward}, Steps: {steps}'.format(reward=self.episode_reward, steps=self.episode_steps))
 
             self.episode_steps = 0
             self.episode_reward = 0
