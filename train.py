@@ -167,8 +167,7 @@ if __name__ == "__main__":
         help='max time steps to run environment')
     parser.add_argument(
         "--test_every_steps",
-        # default=1e3,
-        default=250,
+        default=1e3,
         type=int,
         help='the step interval between two consecutive evaluations')
     args = parser.parse_args()
