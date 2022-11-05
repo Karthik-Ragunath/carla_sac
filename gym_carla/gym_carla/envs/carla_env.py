@@ -81,7 +81,7 @@ class CarlaEnv(gym.Env):
         self.camera_bp.set_attribute('image_size_y', '1080')
         self.camera_bp.set_attribute('fov', '110')
         # Set the time in seconds between sensor captures
-        self.camera_bp.set_attribute('sensor_tick', '1.0')
+        self.camera_bp.set_attribute('sensor_tick', '0.1')
         # Provide the position of the sensor relative to the vehicle.
 
         # Set fixed simulation step for synchronous mode
@@ -486,7 +486,8 @@ class CarlaEnv(gym.Env):
         self.off_road_percentage = curr_off_road_percentage
         self.off_lane_percentage = curr_off_lane_percentage
 
-        reward = 1000 * distance_travelled / 1000 + 0.05 * velocity_diff - 2 * side_walk_intersection_diff - 2 * off_lane_intersection_diff
+        # reward = 1000 * distance_travelled / 1000 + 0.05 * velocity_diff - 2 * side_walk_intersection_diff - 2 * off_lane_intersection_diff
+        reward = (1000 * distance_travelled / 1000)
         return reward
 
     def _make_carla_client(self, host, port):

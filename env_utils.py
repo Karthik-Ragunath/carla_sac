@@ -25,6 +25,7 @@ class Env(object):
         self.action_dim = self.env.env.action_space.shape[0]
         self.total_steps = 0
         self.episode_count = 0
+        self.eval_episode_count = 0
 
     def reset(self):
         while True:
@@ -37,8 +38,8 @@ class Env(object):
         self.obs = np.array(obs_tup)
         return self.obs
 
-    def step(self, action):
-        return_tuple = self.env.step(action)
+    def step(self, action, is_validation=False):
+        return_tuple = self.env.step(action, is_validation=is_validation)
         return_list, numpy_rgb_image, bounding_box_image = return_tuple
         # if numpy_rgb_image.any():
             # print("Image Does Exists")
@@ -53,12 +54,12 @@ class Env(object):
         self.episode_reward += self.reward
         self.obs = self.next_obs_rgb
         if self.done or self.episode_steps >= self._max_episode_steps:
-            # TODO : Change to save every 15 episode
-            if self.episode_count % 15 == 0:
+            # TODO : Change to save every 10 episodes
+            if self.episode_count % 10 == 0:
                 self.episode_count += 1
                 self.env.save_episode = True
                 self.env.episode_num = self.episode_count
-                dir_path = os.path.join(os.getcwd(), 'image_outputs', str(self.env.episode_num))
+                dir_path = os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.env.episode_num))
                 if os.path.exists(dir_path):
                     shutil.rmtree(dir_path)
                 os.mkdir(dir_path)
@@ -147,6 +148,7 @@ class CarlaEnv(object):
             self.env.action_space.high, self.env.action_space.shape)
         self.save_episode = False
         self.episode_num = -1
+        self.eval_episode_num = 0
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -173,13 +175,13 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                plt.savefig(os.path.join(os.getcwd(), 'image_outputs', str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.savefig(os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
 
-    def step(self, action):
+    def step(self, action, is_validation=False):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
             'the action should be in range [-1.0, 1.0]'
         mapped_action = self.action_space.low + (action - (-1.0)) * (
@@ -192,10 +194,13 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            if self.save_episode:
+            if self.save_episode or is_validation:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                plt.savefig(os.path.join(os.getcwd(), 'image_outputs', str(self.episode_num), (str(current_image.frame) + '.png')))
+                if is_validation:
+                    plt.savefig(os.path.join(os.getcwd(), 'eval_episodes', str(self.eval_episode_num), (str(current_image.frame) + '.png')))
+                else:
+                    plt.savefig(os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")

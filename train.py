@@ -10,8 +10,9 @@ from env_config import EnvConfig
 import matplotlib.pyplot as plt
 from torch_base import DetectBoundingBox
 import glob
+import shutil
 
-WARMUP_STEPS = 30
+WARMUP_STEPS = 60
 EVAL_EPISODES = 1
 # MEMORY_SIZE = int(1e4)
 # BATCH_SIZE = 256
@@ -19,7 +20,8 @@ BATCH_SIZE = 30
 MEMORY_SIZE = 60
 GAMMA = 0.99
 TAU = 0.005
-ALPHA = 0.2  # determines the relative importance of entropy term against the reward
+# ALPHA = 0.2  # determines the relative importance of entropy term against the reward
+ALPHA = 0.01
 ACTOR_LR = 3e-4
 CRITIC_LR = 3e-4
 
@@ -40,6 +42,12 @@ def to_rgb_array(image):
 # Runs policy for 3 episodes by default and returns average reward
 def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
     avg_reward = 0.
+    env.eval_episode_count += 1
+    env.env.eval_episode_num = env.eval_episode_count
+    dir_path = os.path.join(os.getcwd(), 'eval_episodes', str(env.eval_episode_count))
+    if os.path.exists(dir_path):
+        shutil.rmtree(dir_path)
+    os.mkdir(dir_path)
     for k in range(eval_episodes):
         obs = env.reset()
         done = False
@@ -47,7 +55,10 @@ def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
         while not done and steps < env._max_episode_steps:
             steps += 1
             action = agent.predict(obs)
-            reward, done, next_obs_rgb = env.step(action)
+            if env.eval_episode_count % 5 == 0:
+                reward, done, next_obs_rgb = env.step(action, is_validation=True)
+            else:
+                reward, done, next_obs_rgb = env.step(action, is_validation=False)
             avg_reward += reward
             obs = next_obs_rgb
     avg_reward /= eval_episodes
@@ -129,7 +140,7 @@ def main():
         # logger.info('----------- Step 2 ------------')
         # Save agent
         # if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
-        if total_steps > int(1) and total_steps > last_save_steps + int(500):
+        if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(500):
             agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
                 model_framework=args.framework, current_steps=(total_steps + pretrained_steps), train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
@@ -138,8 +149,9 @@ def main():
         #logger.info('----------- Step 3 ------------')
         # Evaluate episode
         if (total_steps + 1) // args.test_every_steps >= test_flag:
-            while (total_steps + 1) // args.test_every_steps >= test_flag:
-                test_flag += 1
+            # while (total_steps + 1) // args.test_every_steps >= test_flag:
+            #     test_flag += 1
+            test_flag += 1
             avg_reward, num_steps = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES)
             tensorboard.add_scalar('eval/episode_reward', avg_reward,
                                    total_steps + pretrained_steps)
