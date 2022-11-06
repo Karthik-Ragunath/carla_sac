@@ -59,7 +59,7 @@ class Env(object):
                 self.episode_count += 1
                 self.env.save_episode = True
                 self.env.episode_num = self.episode_count
-                dir_path = os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.env.episode_num))
+                dir_path = os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.env.episode_num))
                 if os.path.exists(dir_path):
                     shutil.rmtree(dir_path)
                 os.mkdir(dir_path)
@@ -175,7 +175,7 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                plt.savefig(os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
@@ -198,9 +198,9 @@ class CarlaEnv(object):
                 fig = plt.figure()
                 plt.imshow(bounded_image)
                 if is_validation:
-                    plt.savefig(os.path.join(os.getcwd(), 'eval_episodes', str(self.eval_episode_num), (str(current_image.frame) + '.png')))
+                    plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_eval', str(self.eval_episode_num), (str(current_image.frame) + '.png')))
                 else:
-                    plt.savefig(os.path.join(os.getcwd(), 'image_outputs_simplified_reward', str(self.episode_num), (str(current_image.frame) + '.png')))
+                    plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")

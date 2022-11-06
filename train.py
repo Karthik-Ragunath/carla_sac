@@ -18,7 +18,7 @@ EVAL_EPISODES = 1
 # BATCH_SIZE = 256
 BATCH_SIZE = 30
 MEMORY_SIZE = 60
-SEQUENTIAL_SIZE = 20
+SEQUENTIAL_SIZE = 30
 GAMMA = 0.99
 TAU = 0.005
 # ALPHA = 0.2  # determines the relative importance of entropy term against the reward
@@ -45,7 +45,7 @@ def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
     avg_reward = 0.
     env.eval_episode_count += 1
     env.env.eval_episode_num = env.eval_episode_count
-    dir_path = os.path.join(os.getcwd(), 'eval_episodes', str(env.eval_episode_count))
+    dir_path = os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_eval', str(env.eval_episode_count))
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path)
@@ -94,7 +94,7 @@ def main():
     if train_envs_params.get('load_recent_model', False):
         # set the computation device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        filenames = glob.glob("torch_model_rgb_images_training/*.ckpt")
+        filenames = glob.glob("torch_model_rgb_actor_critic_modified/*.ckpt")
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:

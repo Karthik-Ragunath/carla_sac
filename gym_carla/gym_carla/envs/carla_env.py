@@ -264,6 +264,9 @@ class CarlaEnv(gym.Env):
                 self.isCollided = False
                 self.isTimeOut = False
 
+                self.previous_distance_travelled = 0
+                self.start_location = self.ego.get_transform().location
+
                 self.previous_location = self.ego.get_transform().location
                 self.distance_travelled = 0
                 self.previous_velocity = self.ego.get_velocity()
@@ -459,6 +462,7 @@ class CarlaEnv(gym.Env):
     '''
 
     def get_reward_bounding_boxes(self):
+        '''
         # reward = 1000 * (d_cur - d_prev) + 0.05 * (v_cur - v_prev) - 0.00002 * (collision_damage_cur - collision_damage_prev) \
         # - 2 * (side_walk_intersection_cur - side_walk_intersection_prev) - 2 * (opposite_lane_intersection_cur - opposite_lane_intersection_prev)
         if self.isCollided:
@@ -487,7 +491,17 @@ class CarlaEnv(gym.Env):
         self.off_lane_percentage = curr_off_lane_percentage
 
         # reward = 1000 * distance_travelled / 1000 + 0.05 * velocity_diff - 2 * side_walk_intersection_diff - 2 * off_lane_intersection_diff
-        reward = (1000 * distance_travelled / 1000)
+        # reward = (1000 * distance_travelled / 1000)
+        '''
+        if self.isCollided:
+            reward = -500
+            return reward
+
+        current_location = self.ego.get_transform().location
+        distance_travelled_from_origin = abs(self.start_location.distance(current_location))
+        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000)
+        self.previous_distance_travelled = distance_travelled_from_origin
+        
         return reward
 
     def _make_carla_client(self, host, port):

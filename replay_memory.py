@@ -47,7 +47,7 @@ class ReplayMemory(object):
         return obs, action, reward, next_obs, terminal
 
     def sample_sequentially(self, batch_size, sequential_size=20):
-        max_size = self.max_size
+        max_size = self.max_size - 1
         current_pos = self._curr_pos
         left_max = current_pos - sequential_size
         if left_max < 0:
