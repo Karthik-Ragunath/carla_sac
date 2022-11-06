@@ -46,6 +46,34 @@ class ReplayMemory(object):
         terminal = self.terminal[batch_idx]
         return obs, action, reward, next_obs, terminal
 
+    def sample_sequentially(self, batch_size, sequential_size=20):
+        max_size = self.max_size
+        current_pos = self._curr_pos
+        left_max = current_pos - sequential_size
+        if left_max < 0:
+            reversed_size = -left_max
+            sampled_indices_1 = np.arange(current_pos)[::-1]
+            sampled_indices_2 = np.arange(max_size, max_size-reversed_size, -1)
+            sampled_indices = np.concatenate((sampled_indices_1, sampled_indices_2))
+            rest_samplable_sequence = np.arange(current_pos, max_size-reversed_size)
+            random_range = np.random.choice(rest_samplable_sequence, size = batch_size - sequential_size, replace=False)
+            sampled_indices = np.concatenate((sampled_indices, random_range))
+        else:
+            sampled_indices = np.arange(left_max, current_pos)[::-1]
+            rest_indices_left = np.arange(0, left_max)
+            rest_indices_right = np.arange(current_pos, max_size)
+            rest_indices_combined = np.concatenate((rest_indices_left, rest_indices_right))
+            random_choice = np.random.choice(rest_indices_combined, size=batch_size - sequential_size, replace=False)
+            sampled_indices = np.concatenate((sampled_indices, random_choice))
+
+        obs = self.obs[sampled_indices]
+        reward = self.reward[sampled_indices]
+        action = self.action[sampled_indices]
+        next_obs = self.next_obs[sampled_indices]
+        terminal = self.terminal[sampled_indices]
+
+        return obs, action, reward, next_obs, terminal
+
     def make_index(self, batch_size):
         """ sample a batch of indexes
 

@@ -18,6 +18,7 @@ EVAL_EPISODES = 1
 # BATCH_SIZE = 256
 BATCH_SIZE = 30
 MEMORY_SIZE = 60
+SEQUENTIAL_SIZE = 20
 GAMMA = 0.99
 TAU = 0.005
 # ALPHA = 0.2  # determines the relative importance of entropy term against the reward
@@ -131,8 +132,9 @@ def main():
         #logger.info('----------- Step 1 ------------')
         # Train agent after collecting sufficient data
         if rpm.size() >= WARMUP_STEPS:
-            batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = rpm.sample_batch(
-                BATCH_SIZE)
+            # batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = rpm.sample_batch(
+            #     BATCH_SIZE)
+            batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = rpm.sample_sequentially(BATCH_SIZE, sequential_size=SEQUENTIAL_SIZE)
             agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
                         batch_terminal)
         # print("-------------------------")
