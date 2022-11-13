@@ -10,6 +10,7 @@ sys.path.append(os.path.join(os.getcwd(), 'torch_base'))
 sys.path.append(os.getcwd())
 from faster_rcnn_model import create_model
 import matplotlib.pyplot as plt
+import argparse
 
 # set the computation device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -87,3 +88,29 @@ class DetectBoundingBox:
             # print("Bounding Box Path:", bounding_box_directory_path, self.image_name)
         # print("Image {image_name} done...".format(image_name=self.image_name))
         return orig_image
+
+def read_image(image_path):
+    image = cv2.imread(image_path)
+    return image
+
+def resize_image(image, dim):
+    image = cv2.resize(image, dim)
+    return image
+
+if __name__ == '__main__':
+    argument_parser = argparse.ArgumentParser(description="detect bounding box class object detection")
+    argument_parser.add_argument("--image_path", "-img", type=str, required=True)
+    argument_parser.add_argument("--image_width", "-width", type=int, required=False, default=300)
+    argument_parser.add_argument("--image_height", "-height", type=int, required=False, default=300)
+    args = argument_parser.parse_args()
+    image = read_image(args.image_path)
+    image = resize_image(image, (args.image_width, args.image_height))
+    detect_bounding_box = DetectBoundingBox(image=image, image_name=args.image_path)
+    bounding_box_image = detect_bounding_box.detect_bounding_boxes()
+    plt.imshow(bounding_box_image)
+    plt.savefig("prediction_image.jpg")
+
+
+
+
+
