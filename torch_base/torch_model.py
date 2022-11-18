@@ -2,6 +2,9 @@ import parl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import xception
+from fusion_model import MyEnsemble as Ensemble
+from torchvision.models import resnet50, ResNet50_Weights
 
 # clamp bounds for Std of action_log
 LOG_SIG_MAX = 2.0
@@ -12,8 +15,10 @@ __all__ = ['TorchModel']
 class TorchModel(parl.Model):
     def __init__(self, obs_dim, action_dim):
         super(TorchModel, self).__init__()
-        self.actor_model = Actor(obs_dim, action_dim)
-        self.critic_model = Critic(obs_dim, action_dim)
+        # self.actor_model = Actor(obs_dim, action_dim)
+        # self.critic_model = Critic(obs_dim, action_dim)
+        self.actor_model = Ensemble(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
+        self.critic_model = Ensemble(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
 
     def policy(self, orig_image_obs, bounding_box_image_obs):
         return self.actor_model(orig_image_obs, bounding_box_image_obs)
@@ -21,7 +26,12 @@ class TorchModel(parl.Model):
     def value(self, obs, action):
         return self.critic_model(obs, action)
 
-
+    def create_model(self):
+        resent_backbone = resnet50(weights=ResNet50_Weights.DEFAULT)
+        resent_backbone.fc.out_features = 1000
+        return resent_backbone
+        
+"""
 class Actor(parl.Model):
     def __init__(self, obs_dim=512, action_dim=2):
         super(Actor, self).__init__()
@@ -215,3 +225,4 @@ class Critic(parl.Model):
         q2 = F.relu(self.l9(q2))
         q2 = self.l10(q2)
         return q1, q2
+"""
