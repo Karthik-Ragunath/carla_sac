@@ -3,7 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import xception
-from fusion_model import MyEnsemble as Ensemble
+from fusion_model import EnsembleActor as ActorModel
+from fusion_model import EnsembleCritic as CriticModel
 from torchvision.models import resnet50, ResNet50_Weights
 
 # clamp bounds for Std of action_log
