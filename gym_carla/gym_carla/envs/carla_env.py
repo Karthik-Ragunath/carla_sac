@@ -77,8 +77,8 @@ class CarlaEnv(gym.Env):
             'sensor.other.collision')
         self.camera_bp = self.world.get_blueprint_library().find('sensor.camera.rgb')
 
-        self.camera_bp.set_attribute('image_size_x', '1920')
-        self.camera_bp.set_attribute('image_size_y', '1080')
+        self.camera_bp.set_attribute('image_size_x', '300')
+        self.camera_bp.set_attribute('image_size_y', '300')
         self.camera_bp.set_attribute('fov', '110')
         # Set the time in seconds between sensor captures
         self.camera_bp.set_attribute('sensor_tick', '0.1')

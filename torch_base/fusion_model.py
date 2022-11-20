@@ -87,7 +87,7 @@ class EnsembleCritic(nn.Module):
         self.q2_layer_4 = nn.Linear(32, 4)
         self.q2_layer_5 = nn.Linear(4, 1)
 
-    def forward(self, rgb_input, actions, bounding_box_input=None, feature_vector=None, merge_layer=True):
+    def forward(self, rgb_input, bounding_box_input=None, actions=None, feature_vector=None, merge_layer=True):
         rgb_features = self.rgb_image_model(rgb_input)
         if merge_layer:
             bounding_box_image_features = self.bounding_box_image_model(bounding_box_input)

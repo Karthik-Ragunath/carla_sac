@@ -18,14 +18,18 @@ class TorchModel(parl.Model):
         super(TorchModel, self).__init__()
         # self.actor_model = Actor(obs_dim, action_dim)
         # self.critic_model = Critic(obs_dim, action_dim)
-        self.actor_model = Actor(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
-        self.critic_model = Critic(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
+        self.actor_model = Actor(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False)
+        self.critic_model = Critic(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False)
 
     def policy(self, orig_image_obs, bounding_box_image_obs):
-        return self.actor_model(orig_image_obs, bounding_box_image_obs)
+        return self.actor_model(orig_image_obs, bounding_box_input=bounding_box_image_obs, merge_layer=True, feature_vector=None)
 
     def value(self, obs, action):
-        return self.critic_model(obs, action)
+        rgb_image = obs[:, 0, :, :, :]
+        bounded_rgb_image = obs[:, 1, :, :, :]
+        rgb_image = rgb_image.float().permute(0, 3, 1, 2)
+        bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
+        return self.critic_model(obs, bounding_box_input=bounded_rgb_image, actions=action)
 
     def create_model(self):
         resent_backbone = resnet50(weights=ResNet50_Weights.DEFAULT)

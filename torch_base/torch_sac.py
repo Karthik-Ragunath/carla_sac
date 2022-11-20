@@ -51,7 +51,7 @@ class TorchSAC(parl.Algorithm):
         return action
 
     def sample(self, normal_image_obs, bounded_image_obs):
-        act_mean, act_log_std = self.model.policy(normal_image_obs, bounded_image_obs)
+        act_mean, act_log_std = self.model.policy(normal_image_obs, bounding_box_input=bounded_image_obs)
         normal = Normal(act_mean, act_log_std.exp())
         # for reparameterization trick  (mean + std*N(0,1))
         x_t = normal.rsample()
@@ -82,7 +82,7 @@ class TorchSAC(parl.Algorithm):
             # q1_next, q2_next = self.target_model.critic_model(
             #     next_obs, next_action)
             q1_next, q2_next = self.target_model.critic_model(
-                next_rgb_image, next_bounded_rgb_image, next_action)
+                next_rgb_image, bounding_box_input=next_bounded_rgb_image, actions=next_action)
             target_Q = torch.min(q1_next, q2_next) - self.alpha * next_log_pro
             target_Q = reward + self.gamma * (1. - terminal) * target_Q
         rgb_image = obs[:, 0, :, :, :]
@@ -90,7 +90,7 @@ class TorchSAC(parl.Algorithm):
         rgb_image = rgb_image.float().permute(0, 3, 1, 2)
         bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
         # cur_q1, cur_q2 = self.model.critic_model(obs, action)
-        cur_q1, cur_q2 = self.model.critic_model(rgb_image, bounded_rgb_image, action)
+        cur_q1, cur_q2 = self.model.critic_model(rgb_image, bounding_box_input=bounded_rgb_image, actions=action)
         critic_loss = F.mse_loss(cur_q1, target_Q) + F.mse_loss(
             cur_q2, target_Q)
 
@@ -107,7 +107,7 @@ class TorchSAC(parl.Algorithm):
         # act, log_pi = self.sample(obs)
         # q1_pi, q2_pi = self.model.critic_model(obs, act)
         act, log_pi = self.sample(rgb_image, bounded_rgb_image)
-        q1_pi, q2_pi = self.model.critic_model(rgb_image, bounded_rgb_image, act)
+        q1_pi, q2_pi = self.model.critic_model(rgb_image, bounding_box_input=bounded_rgb_image, actions=act)
         min_q_pi = torch.min(q1_pi, q2_pi)
         actor_loss = ((self.alpha * log_pi) - min_q_pi).mean()
 
