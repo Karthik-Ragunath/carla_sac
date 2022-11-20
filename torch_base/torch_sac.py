@@ -51,7 +51,7 @@ class TorchSAC(parl.Algorithm):
         return action
 
     def sample(self, normal_image_obs, bounded_image_obs):
-        act_mean, act_log_std = self.model.policy(normal_image_obs, bounding_box_input=bounded_image_obs)
+        act_mean, act_log_std = self.model.policy(normal_image_obs, bounded_image_obs)
         normal = Normal(act_mean, act_log_std.exp())
         # for reparameterization trick  (mean + std*N(0,1))
         x_t = normal.rsample()

@@ -499,7 +499,10 @@ class CarlaEnv(gym.Env):
 
         current_location = self.ego.get_transform().location
         distance_travelled_from_origin = abs(self.start_location.distance(current_location))
-        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000)
+        current_velocity = self.ego.get_velocity()
+        curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
+        curr_velocity_norm = np.linalg.norm(curr_velocity_array)
+        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000) - abs(10 - curr_velocity_norm)
         self.previous_distance_travelled = distance_travelled_from_origin
         
         return reward

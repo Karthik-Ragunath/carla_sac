@@ -55,8 +55,6 @@ class EnsembleActor(nn.Module):
             x = self.layer_3(F.relu(x))
             x = self.layer_4(F.relu(x))
             x = self.layer_5(F.relu(x))
-
-        x = self.action_output_layer(F.relu(x))
         
         act_mean = self.actor_mean_layer_1(F.relu(x))
         act_mean = self.actor_mean_layer_2(F.relu(act_mean))
