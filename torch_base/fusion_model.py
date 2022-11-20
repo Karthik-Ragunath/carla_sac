@@ -2,6 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# clamp bounds for Std of action_log
+LOG_SIG_MAX = 2.0
+LOG_SIG_MIN = -20.0
+
 class EnsembleActor(nn.Module):
     def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False):
         super(EnsembleActor, self).__init__()
@@ -24,7 +28,11 @@ class EnsembleActor(nn.Module):
             self.layer_4 = nn.Linear(128, 32)
             self.layer_5 = nn.Linear(32, 12)
         
-        self.action_output_layer = nn.Linear(12, 2)
+        self.actor_mean_layer_1 = nn.Linear(12, 4)
+        self.actor_mean_layer_2 = nn.Linear(4, 2)
+
+        self.actor_std_layer_1 = nn.Linear(12, 4)
+        self.actor_std_layer_2 = nn.Linear(4, 2)
         
     def forward(self, rgb_input, bounding_box_input=None, feature_vector=None, merge_layer=True):
         rgb_features = self.rgb_image_model(rgb_input)
@@ -49,7 +57,14 @@ class EnsembleActor(nn.Module):
             x = self.layer_5(F.relu(x))
 
         x = self.action_output_layer(F.relu(x))
-        return x
+        
+        act_mean = self.actor_mean_layer_1(F.relu(x))
+        act_mean = self.actor_mean_layer_2(F.relu(act_mean))
+
+        act_std = self.actor_std_layer_1(F.relu(x))
+        act_std = self.actor_std_layer_2(F.relu(act_std))
+        act_log_std = torch.clamp(act_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
+        return act_mean, act_log_std
 
 class EnsembleCritic(nn.Module):
     def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False):

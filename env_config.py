@@ -38,7 +38,7 @@ train_code_mode = 'train'
 train_envs_params = deepcopy(params)
 train_envs_params['port'] = train_env_port
 train_envs_params['code_mode'] = train_code_mode
-train_envs_params['load_recent_model'] = True
+train_envs_params['load_recent_model'] = False
 
 # evaluate env params
 eval_port = 2027
@@ -47,7 +47,7 @@ temp_params = deepcopy(params)
 temp_params['port'] = eval_port
 temp_params['code_mode'] = eval_code_mode
 eval_env_params = temp_params
-eval_env_params['load_recent_model'] = True
+eval_env_params['load_recent_model'] = False
 
 # test env params
 test_port = 2029
@@ -56,7 +56,7 @@ temp_params = deepcopy(params)
 temp_params['port'] = test_port
 temp_params['code_mode'] = test_code_mode
 test_env_params = temp_params
-test_env_params['load_recent_model'] = True
+test_env_params['load_recent_model'] = False
 
 EnvConfig = {
     # train envs config
