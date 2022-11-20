@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import xception
-from fusion_model import EnsembleActor as ActorModel
-from fusion_model import EnsembleCritic as CriticModel
+from fusion_model import EnsembleActor as Actor
+from fusion_model import EnsembleCritic as Critic
 from torchvision.models import resnet50, ResNet50_Weights
 
 # clamp bounds for Std of action_log
@@ -18,8 +18,8 @@ class TorchModel(parl.Model):
         super(TorchModel, self).__init__()
         # self.actor_model = Actor(obs_dim, action_dim)
         # self.critic_model = Critic(obs_dim, action_dim)
-        self.actor_model = Ensemble(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
-        self.critic_model = Ensemble(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
+        self.actor_model = Actor(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
+        self.critic_model = Critic(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model())
 
     def policy(self, orig_image_obs, bounding_box_image_obs):
         return self.actor_model(orig_image_obs, bounding_box_image_obs)
