@@ -502,7 +502,8 @@ class CarlaEnv(gym.Env):
         current_velocity = self.ego.get_velocity()
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
-        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000) - abs(10 - curr_velocity_norm)
+        r_step = 10
+        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000) - abs(10 - curr_velocity_norm) + r_step
         self.previous_distance_travelled = distance_travelled_from_origin
         
         return reward
