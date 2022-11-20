@@ -16,8 +16,8 @@ import shutil
 from torch_base import DetectBoundingBox
 
 class Env(object):
-    def __init__(self, env_name, train_envs_params):
-        self.env = CarlaEnv(env_name=env_name, params=train_envs_params)
+    def __init__(self, env_name, train_envs_params, context):
+        self.env = CarlaEnv(env_name=env_name, params=train_envs_params, context=context)
         self.episode_reward = 0
         self.episode_steps = 0
         self._max_episode_steps = train_envs_params['max_time_episode']
@@ -26,6 +26,8 @@ class Env(object):
         self.total_steps = 0
         self.episode_count = 0
         self.eval_episode_count = 0
+        self.train_vis_dir = context + '_train'
+        self.valid_vis_dir = context + '_valid'
 
     def reset(self):
         while True:
@@ -59,7 +61,7 @@ class Env(object):
                 self.episode_count += 1
                 self.env.save_episode = True
                 self.env.episode_num = self.episode_count
-                dir_path = os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.env.episode_num))
+                dir_path = os.path.join(os.getcwd(), self.train_vis_dir, str(self.env.episode_num))
                 if os.path.exists(dir_path):
                     shutil.rmtree(dir_path)
                 os.mkdir(dir_path)
@@ -125,7 +127,7 @@ class LocalEnv(object):
         return action_out, current_image
 
 class CarlaEnv(object):
-    def __init__(self, env_name, params):
+    def __init__(self, env_name, params, context):
         class ActionSpace(object):
             def __init__(self,
                          action_space=None,
@@ -149,6 +151,8 @@ class CarlaEnv(object):
         self.save_episode = False
         self.episode_num = -1
         self.eval_episode_num = 0
+        self.train_vis_dir = context + '_train'
+        self.valid_vis_dir = context + '_valid'
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -175,7 +179,7 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
@@ -198,9 +202,9 @@ class CarlaEnv(object):
                 fig = plt.figure()
                 plt.imshow(bounded_image)
                 if is_validation:
-                    plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_eval', str(self.eval_episode_num), (str(current_image.frame) + '.png')))
+                    plt.savefig(os.path.join(os.getcwd(), self.valid_vis_dir, str(self.eval_episode_num), (str(current_image.frame) + '.png')))
                 else:
-                    plt.savefig(os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_train', str(self.episode_num), (str(current_image.frame) + '.png')))
+                    plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")

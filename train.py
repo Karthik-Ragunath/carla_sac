@@ -41,11 +41,11 @@ def to_rgb_array(image):
     return array
 
 # Runs policy for 3 episodes by default and returns average reward
-def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes):
+def run_evaluate_episodes(agent: TorchAgent, env: Env, eval_episodes, valid_vis_dir):
     avg_reward = 0.
     env.eval_episode_count += 1
     env.env.eval_episode_num = env.eval_episode_count
-    dir_path = os.path.join(os.getcwd(), 'rgb_actor_critic_modified_v2_eval', str(env.eval_episode_count))
+    dir_path = os.path.join(os.getcwd(), valid_vis_dir, str(env.eval_episode_count))
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path)
@@ -72,13 +72,22 @@ def main():
 
     # Parallel environments for training
     train_envs_params = EnvConfig['train_envs_params']
-    train_env = Env(args.env, train_envs_params)
+    train_env = Env(args.env, train_envs_params, EnvConfig['train_context'])
 
     # env for eval
     eval_env_params = EnvConfig['eval_env_params']
-    eval_env = Env(args.env, eval_env_params)
+    eval_env = Env(args.env, eval_env_params, EnvConfig['train_context'])
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
+
+    train_vis_dir = EnvConfig['train_context'] + '_train'
+    valid_vis_dir = EnvConfig['train_context'] + '_valid'
+
+    if not os.path.exists(train_vis_dir):
+        os.makedirs(train_vis_dir)
+    
+    if not os.path.exists(valid_vis_dir):
+        os.makedirs(valid_vis_dir)
 
     # Initialize model, algorithm, agent, replay_memory
     CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
@@ -154,7 +163,7 @@ def main():
             # while (total_steps + 1) // args.test_every_steps >= test_flag:
             #     test_flag += 1
             test_flag += 1
-            avg_reward, num_steps = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES)
+            avg_reward, num_steps = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES, valid_vis_dir)
             tensorboard.add_scalar('eval/episode_reward', avg_reward,
                                    total_steps + pretrained_steps)
             tensorboard.add_scalar('eval/episode_steps', num_steps,
