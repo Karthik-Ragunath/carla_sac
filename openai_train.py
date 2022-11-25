@@ -27,6 +27,14 @@ except ImportError:
         "pygame is not installed, run `pip install gym[box2d]`"
     )
 
+from torch_base import TorchModel, TorchSAC, TorchAgent
+
+GAMMA = 0.99
+TAU = 0.005
+# ALPHA = 0.2  # determines the relative importance of entropy term against the reward
+ALPHA = 0.01
+ACTOR_LR = 3e-4
+CRITIC_LR = 3e-4
 
 STATE_W = 96  # less than Atari 160x192
 STATE_H = 96
@@ -42,7 +50,6 @@ FPS = 50  # Frames per second
 ZOOM = 2.7  # Camera zoom
 ZOOM_FOLLOW = True  # Set to False for fixed view (don't use zoom)
 
-
 TRACK_DETAIL_STEP = 21 / SCALE
 TRACK_TURN_RATE = 0.31
 TRACK_WIDTH = 40 / SCALE
@@ -53,6 +60,8 @@ MAX_SHAPE_DIM = (
     max(GRASS_DIM, TRACK_WIDTH, TRACK_DETAIL_STEP) * math.sqrt(2) * ZOOM * SCALE
 )
 
+OBSERVATION_DIM = 96 * 96 * 3
+ACTION_DIM = 2
 
 class FrictionDetector(contactListener):
     def __init__(self, env, lap_complete_percent):
@@ -776,7 +785,18 @@ class CarRacing(gym.Env, EzPickle):
 
 if __name__ == "__main__":
     a = np.array([0.0, 0.0, 0.0])
-
+    Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
+    model = Model(OBSERVATION_DIM, ACTION_DIM)
+    algorithm = Algorithm(
+        model,
+        gamma=GAMMA,
+        tau=TAU,
+        alpha=ALPHA,
+        actor_lr=ACTOR_LR,
+        critic_lr=CRITIC_LR
+    )
+    agent = Agent(algorithm)
+    
     def register_input():
         global quit, restart
         for event in pygame.event.get():
