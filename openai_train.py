@@ -36,8 +36,10 @@ ALPHA = 0.01
 ACTOR_LR = 3e-4
 CRITIC_LR = 3e-4
 
-STATE_W = 96  # less than Atari 160x192
-STATE_H = 96
+# STATE_W = 96  # less than Atari 160x192
+# STATE_H = 96
+STATE_W = 224  # less than Atari 160x192
+STATE_H = 224
 VIDEO_W = 600
 VIDEO_H = 400
 WINDOW_W = 1000
@@ -784,7 +786,7 @@ class CarRacing(gym.Env, EzPickle):
 
 
 if __name__ == "__main__":
-    a = np.array([0.0, 0.0, 0.0])
+    a = np.array([0.0, 0.0])
     Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
     model = Model(OBSERVATION_DIM, ACTION_DIM)
     algorithm = Algorithm(
