@@ -7,7 +7,7 @@ from copy import deepcopy
 TASK_MODE = 'Lane'
 MAX_EPISODE_STEPS = 250
 # MAX_EPISODE_STEPS = 475
-OPEN_AI_IMPLEMENTATION = True
+OPEN_AI_IMPLEMENTATION = False
 
 params = {
     'action_dim': 3 if OPEN_AI_IMPLEMENTATION else 2,
