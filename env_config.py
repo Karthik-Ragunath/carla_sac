@@ -72,5 +72,5 @@ EnvConfig = {
     'test_env_params': test_env_params,
 
     # training context
-    'train_context': "rgb_actor_critic_modified_v4"
+    'train_context': "rgb_actor_critic_modified_v5"
 }
