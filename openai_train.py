@@ -28,6 +28,7 @@ except ImportError:
     )
 
 from torch_base import TorchModel, TorchSAC, TorchAgent
+from replay_memory import ReplayMemory
 
 GAMMA = 0.99
 TAU = 0.005
@@ -38,7 +39,7 @@ CRITIC_LR = 3e-4
 
 # STATE_W = 96  # less than Atari 160x192
 # STATE_H = 96
-STATE_W = 224  # less than Atari 160x192
+STATE_W = 224
 STATE_H = 224
 VIDEO_W = 600
 VIDEO_H = 400
@@ -62,8 +63,9 @@ MAX_SHAPE_DIM = (
     max(GRASS_DIM, TRACK_WIDTH, TRACK_DETAIL_STEP) * math.sqrt(2) * ZOOM * SCALE
 )
 
-OBSERVATION_DIM = 96 * 96 * 3
+OBSERVATION_DIM = 224 * 224 * 3
 ACTION_DIM = 2
+MEMORY_SIZE = 60
 
 class FrictionDetector(contactListener):
     def __init__(self, env, lap_complete_percent):
@@ -798,6 +800,10 @@ if __name__ == "__main__":
         critic_lr=CRITIC_LR
     )
     agent = Agent(algorithm)
+    
+    replay_memory = ReplayMemory(
+        max_size=MEMORY_SIZE, obs_dim=OBSERVATION_DIM, act_dim=ACTION_DIM
+    )
     
     def register_input():
         global quit, restart
