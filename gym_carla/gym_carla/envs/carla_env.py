@@ -293,6 +293,8 @@ class CarlaEnv(gym.Env):
             # else:
             #     throttle = 0
             #     brake = -throttle_or_brake
+
+            # suspicious snippet of code
             current_action = np.array(action) + self.last_action
             current_action = np.clip(
                 current_action, -1.0, 1.0)
