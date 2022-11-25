@@ -7,7 +7,7 @@ LOG_SIG_MAX = 2.0
 LOG_SIG_MIN = -20.0
 
 class EnsembleActor(nn.Module):
-    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False):
+    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, open_ai_mode=False):
         super(EnsembleActor, self).__init__()
         self.rgb_image_model = rgb_image_model
         if merge_layer:
@@ -29,10 +29,18 @@ class EnsembleActor(nn.Module):
             self.layer_5 = nn.Linear(32, 12)
         
         self.actor_mean_layer_1 = nn.Linear(12, 4)
-        self.actor_mean_layer_2 = nn.Linear(4, 2)
+        
+        if not open_ai_mode:
+            self.actor_mean_layer_2 = nn.Linear(4, 2)
+        else:
+            self.actor_mean_layer_2 = nn.Linear(4, 3)
 
         self.actor_std_layer_1 = nn.Linear(12, 4)
-        self.actor_std_layer_2 = nn.Linear(4, 2)
+
+        if not open_ai_mode:
+            self.actor_std_layer_2 = nn.Linear(4, 2)
+        else:
+            self.actor_std_layer_2 = nn.Linear(4, 3)
         
     def forward(self, rgb_input, bounding_box_input=None, feature_vector=None, merge_layer=True):
         rgb_features = self.rgb_image_model(rgb_input)
