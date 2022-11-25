@@ -7,7 +7,9 @@ from copy import deepcopy
 TASK_MODE = 'Lane'
 MAX_EPISODE_STEPS = 250
 # MAX_EPISODE_STEPS = 475
+OPEN_AI_IMPLEMENTATION = True
 params = {
+    'action_dim': 3 if OPEN_AI_IMPLEMENTATION else 2,
     # screen size of cv2 window
     'obs_size': (160, 100),
     # time interval between two frames

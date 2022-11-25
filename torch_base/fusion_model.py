@@ -73,7 +73,7 @@ class EnsembleActor(nn.Module):
         return act_mean, act_log_std
 
 class EnsembleCritic(nn.Module):
-    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False):
+    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, open_ai_mode=False):
         super(EnsembleCritic, self).__init__()
         self.rgb_image_model = rgb_image_model
         if merge_layer:
@@ -94,7 +94,10 @@ class EnsembleCritic(nn.Module):
             self.layer_4 = nn.Linear(128, 32)
             self.layer_5 = nn.Linear(32, 12)
         
-        self.merge_layer_actions = nn.Linear(14, 256)
+        if not open_ai_mode:
+            self.merge_layer_actions = nn.Linear(14, 256)
+        else:
+            self.merge_layer_actions = nn.Linear(15, 256)
 
         self.q1_layer_1 = nn.Linear(256, 128)
         self.q1_layer_2 = nn.Linear(128, 64)
