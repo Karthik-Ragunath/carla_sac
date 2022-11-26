@@ -540,12 +540,20 @@ class CarRacing(gym.Env, EzPickle):
         return self.step(None)[0], {}
 
     def step(self, action: Union[np.ndarray, int]):
+        throttle_or_brake, steer = action
+        if throttle_or_brake >= 0:
+            throttle = throttle_or_brake
+            brake = 0
+        else:
+            throttle = 0
+            brake = -throttle_or_brake
+
         assert self.car is not None
         if action is not None:
             if self.continuous:
-                self.car.steer(-action[0])
-                self.car.gas(action[1])
-                self.car.brake(action[2])
+                self.car.steer(-steer)
+                self.car.gas(throttle)
+                self.car.brake(brake)
             else:
                 if not self.action_space.contains(action):
                     raise InvalidAction(
