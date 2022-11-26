@@ -7,7 +7,7 @@ LOG_SIG_MAX = 2.0
 LOG_SIG_MIN = -20.0
 
 class EnsembleActor(nn.Module):
-    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, open_ai_mode=False):
+    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, action_dim=2):
         super(EnsembleActor, self).__init__()
         self.rgb_image_model = rgb_image_model
         if merge_layer:
@@ -29,18 +29,10 @@ class EnsembleActor(nn.Module):
             self.layer_5 = nn.Linear(32, 12)
         
         self.actor_mean_layer_1 = nn.Linear(12, 4)
-        
-        if not open_ai_mode:
-            self.actor_mean_layer_2 = nn.Linear(4, 2)
-        else:
-            self.actor_mean_layer_2 = nn.Linear(4, 3)
+        self.actor_mean_layer_2 = nn.Linear(4, action_dim)
 
         self.actor_std_layer_1 = nn.Linear(12, 4)
-
-        if not open_ai_mode:
-            self.actor_std_layer_2 = nn.Linear(4, 2)
-        else:
-            self.actor_std_layer_2 = nn.Linear(4, 3)
+        self.actor_std_layer_2 = nn.Linear(4, action_dim)
         
     def forward(self, rgb_input, bounding_box_input=None, feature_vector=None, merge_layer=True):
         rgb_features = self.rgb_image_model(rgb_input)
@@ -73,7 +65,7 @@ class EnsembleActor(nn.Module):
         return act_mean, act_log_std
 
 class EnsembleCritic(nn.Module):
-    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, open_ai_mode=False):
+    def __init__(self, rgb_image_model, bounding_box_image_model=None, merge_layer=True, add_feature_vector=False, action_dim=2):
         super(EnsembleCritic, self).__init__()
         self.rgb_image_model = rgb_image_model
         if merge_layer:
@@ -94,10 +86,7 @@ class EnsembleCritic(nn.Module):
             self.layer_4 = nn.Linear(128, 32)
             self.layer_5 = nn.Linear(32, 12)
         
-        if not open_ai_mode:
-            self.merge_layer_actions = nn.Linear(14, 256)
-        else:
-            self.merge_layer_actions = nn.Linear(15, 256)
+        self.merge_layer_actions = nn.Linear(12 + action_dim, 256)
 
         self.q1_layer_1 = nn.Linear(256, 128)
         self.q1_layer_2 = nn.Linear(128, 64)

@@ -17,8 +17,8 @@ class TorchModel(parl.Model):
         super(TorchModel, self).__init__()
         # self.actor_model = Actor(obs_dim, action_dim)
         # self.critic_model = Critic(obs_dim, action_dim)
-        self.actor_model = Actor(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False)
-        self.critic_model = Critic(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False)
+        self.actor_model = Actor(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False, action_dim=action_dim)
+        self.critic_model = Critic(rgb_image_model=self.create_model(), bounding_box_image_model=self.create_model(), merge_layer=True, add_feature_vector=False, action_dim=action_dim)
 
     def policy(self, orig_image_obs, bounding_box_image_obs):
         return self.actor_model(orig_image_obs, bounding_box_input=bounding_box_image_obs, merge_layer=True, feature_vector=None)
