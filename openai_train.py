@@ -795,8 +795,11 @@ class CarRacing(gym.Env, EzPickle):
             self.isopen = False
             pygame.quit()
 
-def parse_arguments() -> SimpleNameSpace:
+def parse_arguments() -> SimpleNamespace:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--load_recent_model", "-load_model", description="should we load recent model?", default=False, required=False)
+    parser.add_argument("--model_framework", "-framework", description="which simulator/model framework is used?", default="openai", required=False)
+    parser.add_argument("--train_context", "-context", description="what is the train context?", default="actor_critic_v1", required=False)
     args = parser.parse_args()
     return args
 
@@ -811,7 +814,7 @@ if __name__ == "__main__":
     if args.load_recent_model:
         # set the computation device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        filenames = glob.glob("openai_model_rgb_actor_critic_modified/*.ckpt")
+        filenames = glob.glob("openai_model_actor_critic_v1/*.ckpt")
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:
