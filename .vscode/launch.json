@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "openai_racing",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/openai_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--load_recent_model",
+                "--model_framework",
+                "openai",
+                "--train_context",
+                "actor_critic_v1"
+            ]
+        },
+        {
+            "name": "detect_bounding_box",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/torch_base/detect_bounding_boxes.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/",
+            "args": [
+                "--image_path",
+                "test_carla_image.png",
+                "--image_width",
+                "300",
+                "--image_height",
+                "300"
+            ]
+        },
+        {
+            "name": "train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "args": [
+                "--xparl_addr",
+                "localhost:8080",
+                "--framework",
+                "torch",
+                "--train_total_steps",
+                "351100"
+            ],
+            "subProcess": true,
+            "python": "${command:python.interpreterPath}"
+        }
+    ]
+}

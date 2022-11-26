@@ -797,7 +797,7 @@ class CarRacing(gym.Env, EzPickle):
 
 def parse_arguments() -> SimpleNamespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--load_recent_model", "-load_model", description="should we load recent model?", default=False, required=False)
+    parser.add_argument("--load_recent_model", "-load_model", description="should we load recent model?", action="store_true")
     parser.add_argument("--model_framework", "-framework", description="which simulator/model framework is used?", default="openai", required=False)
     parser.add_argument("--train_context", "-context", description="what is the train context?", default="actor_critic_v1", required=False)
     args = parser.parse_args()
