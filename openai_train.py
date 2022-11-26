@@ -1,5 +1,6 @@
 __credits__ = ["Andrea PIERRÉ"]
 
+import argparse
 import math
 from typing import Optional, Union
 
@@ -29,6 +30,10 @@ except ImportError:
 
 from torch_base import TorchModel, TorchSAC, TorchAgent
 from replay_memory import ReplayMemory
+from types import SimpleNamespace
+import glob
+import os
+import torch
 
 GAMMA = 0.99
 TAU = 0.005
@@ -66,6 +71,10 @@ MAX_SHAPE_DIM = (
 OBSERVATION_DIM = 224 * 224 * 3
 ACTION_DIM = 2
 MEMORY_SIZE = 60
+
+WARMUP_STEPS = 60
+BATCH_SIZE = 30
+SEQUENTIAL_SIZE = 30
 
 class FrictionDetector(contactListener):
     def __init__(self, env, lap_complete_percent):
@@ -786,11 +795,36 @@ class CarRacing(gym.Env, EzPickle):
             self.isopen = False
             pygame.quit()
 
+def parse_arguments() -> SimpleNameSpace:
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
+    return args
 
 if __name__ == "__main__":
+    args = parse_arguments()
+
     a = np.array([0.0, 0.0])
     Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
     model = Model(OBSERVATION_DIM, ACTION_DIM)
+
+    pretrained_steps = 0
+    if args.load_recent_model:
+        # set the computation device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        filenames = glob.glob("openai_model_rgb_actor_critic_modified/*.ckpt")
+        model_filename = None
+        max_train_epoch = 0
+        for filename in filenames:
+            epoch_num = int(filename.split('/')[-1].split('_')[1])
+            if epoch_num > max_train_epoch:
+                max_train_epoch = epoch_num
+                model_filename = filename
+                pretrained_steps = max_train_epoch
+        if model_filename:
+            model.load_state_dict(torch.load(
+                os.path.join(os.getcwd(), model_filename), map_location=device
+            ))
+
     algorithm = Algorithm(
         model,
         gamma=GAMMA,
@@ -802,7 +836,7 @@ if __name__ == "__main__":
     agent = Agent(algorithm)
     
     replay_memory = ReplayMemory(
-        max_size=MEMORY_SIZE, obs_dim=OBSERVATION_DIM, act_dim=ACTION_DIM
+        max_size=MEMORY_SIZE, obs_dim=OBSERVATION_DIM, act_dim=ACTION_DIM, openai_mode=True, merge_images=False
     )
     
     def register_input():
@@ -838,19 +872,40 @@ if __name__ == "__main__":
     env = CarRacing(render_mode="human")
 
     quit = False
+
+    total_steps = 0
+    last_save_steps = 0
     while not quit:
-        env.reset()
+        s, _ = env.reset()
         total_reward = 0.0
         steps = 0
         restart = False
         while True:
             register_input()
-            s, r, terminated, truncated, info = env.step(a)
+            if replay_memory.size() < WARMUP_STEPS:
+                action = np.random.uniform(-1, 1, size=ACTION_DIM)
+            else:
+                action = agent.sample(s)
+            next_state, r, terminated, truncated, info = env.step(action)
             total_reward += r
+            replay_memory.append(s, action, r, next_state, terminated)
+            s = next_state
+
+            if replay_memory.size() >= WARMUP_STEPS:
+                batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = replay_memory.sample_sequentially(BATCH_SIZE, sequential_size=SEQUENTIAL_SIZE)
+                agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
+                            batch_terminal)
+
             if steps % 200 == 0 or terminated or truncated:
                 print("\naction " + str([f"{x:+0.2f}" for x in a]))
                 print(f"step {steps} total_reward {total_reward:+0.2f}")
             steps += 1
+            total_steps += 1
+            if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(100):
+                agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
+                    model_framework=args.framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
+                last_save_steps = total_steps
+
             if terminated or truncated or restart or quit:
                 break
     env.close()
