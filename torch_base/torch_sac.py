@@ -18,7 +18,8 @@ class TorchSAC(parl.Algorithm):
                  tau=None,
                  alpha=None,
                  actor_lr=None,
-                 critic_lr=None):
+                 critic_lr=None,
+                 merge_layer=True):
         """ SAC algorithm
             Args:
                 model(parl.Model): forward network of actor and critic.
@@ -44,6 +45,7 @@ class TorchSAC(parl.Algorithm):
             self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
+        self.merge_layer = merge_layer
 
     def predict(self, original_image, bounding_box_image):
         act_mean, _ = self.model.policy(original_image, bounding_box_image)
@@ -74,9 +76,12 @@ class TorchSAC(parl.Algorithm):
     def _critic_learn(self, obs, action, reward, next_obs, terminal):
         with torch.no_grad():
             next_rgb_image = next_obs[:, 0, :, :, :]
-            next_bounded_rgb_image = next_obs[:, 1, :, :, :]
             next_rgb_image = next_rgb_image.float().permute(0, 3, 1, 2)
-            next_bounded_rgb_image = next_bounded_rgb_image.float().permute(0, 3, 1, 2)
+            if self.merge_layer:
+                next_bounded_rgb_image = next_obs[:, 1, :, :, :]
+                next_bounded_rgb_image = next_bounded_rgb_image.float().permute(0, 3, 1, 2)
+            else:
+                next_bounded_rgb_image = None
             # print("Tensor Sizes:", next_rgb_image.size(), next_bounded_rgb_image.size())
             next_action, next_log_pro = self.sample(next_rgb_image, next_bounded_rgb_image)
             # q1_next, q2_next = self.target_model.critic_model(
@@ -101,9 +106,12 @@ class TorchSAC(parl.Algorithm):
 
     def _actor_learn(self, obs):
         rgb_image = obs[:, 0, :, :, :]
-        bounded_rgb_image = obs[:, 1, :, :, :]
         rgb_image = rgb_image.float().permute(0, 3, 1, 2)
-        bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
+        if self.merge_layer:
+            bounded_rgb_image = obs[:, 1, :, :, :]
+            bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
+        else:
+            bounded_rgb_image = None
         # act, log_pi = self.sample(obs)
         # q1_pi, q2_pi = self.model.critic_model(obs, act)
         act, log_pi = self.sample(rgb_image, bounded_rgb_image)

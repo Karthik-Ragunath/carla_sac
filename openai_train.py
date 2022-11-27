@@ -82,6 +82,8 @@ WARMUP_STEPS = 60
 BATCH_SIZE = 30
 SEQUENTIAL_SIZE = 30
 SEED = 123
+MERGE_LAYER = False
+ADD_FEATURE_VECTOR = False
 
 class FrictionDetector(contactListener):
     def __init__(self, env, lap_complete_percent):
@@ -822,7 +824,7 @@ if __name__ == "__main__":
 
     a = np.array([0.0, 0.0])
     Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
-    model = Model(OBSERVATION_DIM, ACTION_DIM)
+    model = Model(OBSERVATION_DIM, ACTION_DIM, merge_layer=MERGE_LAYER, add_feature_vector=ADD_FEATURE_VECTOR)
 
     pretrained_steps = 0
     if args.load_recent_model:
@@ -848,7 +850,8 @@ if __name__ == "__main__":
         tau=TAU,
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
-        critic_lr=CRITIC_LR
+        critic_lr=CRITIC_LR,
+        merge_layer=MERGE_LAYER
     )
     agent = Agent(algorithm)
     
