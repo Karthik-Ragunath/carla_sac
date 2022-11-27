@@ -13,7 +13,7 @@ LOG_SIG_MIN = -20.0
 __all__ = ['TorchModel']
 
 class TorchModel(parl.Model):
-    def __init__(self, obs_dim, action_dim):
+    def __init__(self, obs_dim, action_dim, merge_layer=True, add_feature_vector=False):
         super(TorchModel, self).__init__()
         # self.actor_model = Actor(obs_dim, action_dim)
         # self.critic_model = Critic(obs_dim, action_dim)

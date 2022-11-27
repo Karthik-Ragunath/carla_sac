@@ -26,7 +26,10 @@ class EnsembleActor(nn.Module):
             self.layer_2 = nn.Linear(512, 256)
             self.layer_3 = nn.Linear(256, 128)
             self.layer_4 = nn.Linear(128, 32)
-            self.layer_5 = nn.Linear(32, 12)
+            if add_feature_vector:
+                self.merge_layer_features = nn.Linear(46, 12)
+            else:
+                self.layer_5 = nn.Linear(32, 12)
         
         self.actor_mean_layer_1 = nn.Linear(12, 4)
         self.actor_mean_layer_2 = nn.Linear(4, action_dim)
@@ -54,7 +57,11 @@ class EnsembleActor(nn.Module):
             x = self.layer_2(F.relu(x))
             x = self.layer_3(F.relu(x))
             x = self.layer_4(F.relu(x))
-            x = self.layer_5(F.relu(x))
+            if feature_vector:
+                x = torch.cat((x, feature_vector), dim=1)
+                x = self.merge_layer_features(F.relu(x))
+            else:
+                x = self.layer_5(F.relu(x))
         
         act_mean = self.actor_mean_layer_1(F.relu(x))
         act_mean = self.actor_mean_layer_2(F.relu(act_mean))
