@@ -851,7 +851,8 @@ if __name__ == "__main__":
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR,
-        merge_layer=MERGE_LAYER
+        merge_layer=MERGE_LAYER,
+        add_feature_vector=ADD_FEATURE_VECTOR
     )
     agent = Agent(algorithm)
     

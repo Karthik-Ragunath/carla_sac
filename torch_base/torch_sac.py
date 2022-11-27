@@ -19,7 +19,8 @@ class TorchSAC(parl.Algorithm):
                  alpha=None,
                  actor_lr=None,
                  critic_lr=None,
-                 merge_layer=True):
+                 merge_layer=True,
+                 add_feature_vector=False):
         """ SAC algorithm
             Args:
                 model(parl.Model): forward network of actor and critic.
@@ -46,6 +47,7 @@ class TorchSAC(parl.Algorithm):
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
         self.merge_layer = merge_layer
+        self.add_feature_vector = add_feature_vector
 
     def predict(self, original_image, bounding_box_image):
         act_mean, _ = self.model.policy(original_image, bounding_box_image)
@@ -87,15 +89,28 @@ class TorchSAC(parl.Algorithm):
             # q1_next, q2_next = self.target_model.critic_model(
             #     next_obs, next_action)
             q1_next, q2_next = self.target_model.critic_model(
-                next_rgb_image, bounding_box_input=next_bounded_rgb_image, actions=next_action)
+                next_rgb_image, 
+                bounding_box_input=next_bounded_rgb_image, 
+                actions=next_action, 
+                merge_layer=self.merge_layer,
+                feature_vector=self.add_feature_vector
+            )
             target_Q = torch.min(q1_next, q2_next) - self.alpha * next_log_pro
             target_Q = reward + self.gamma * (1. - terminal) * target_Q
         rgb_image = obs[:, 0, :, :, :]
-        bounded_rgb_image = obs[:, 1, :, :, :]
         rgb_image = rgb_image.float().permute(0, 3, 1, 2)
-        bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
-        # cur_q1, cur_q2 = self.model.critic_model(obs, action)
-        cur_q1, cur_q2 = self.model.critic_model(rgb_image, bounding_box_input=bounded_rgb_image, actions=action)
+        if self.merge_layer:
+            bounded_rgb_image = obs[:, 1, :, :, :]
+            bounded_rgb_image = bounded_rgb_image.float().permute(0, 3, 1, 2)
+        else:
+            bounded_rgb_image = None
+        cur_q1, cur_q2 = self.model.critic_model(
+            rgb_image, 
+            bounding_box_input=bounded_rgb_image, 
+            actions=action,
+            merge_layer=self.merge_layer,
+            feature_vector=self.add_feature_vector
+        )
         critic_loss = F.mse_loss(cur_q1, target_Q) + F.mse_loss(
             cur_q2, target_Q)
 
@@ -115,7 +130,13 @@ class TorchSAC(parl.Algorithm):
         # act, log_pi = self.sample(obs)
         # q1_pi, q2_pi = self.model.critic_model(obs, act)
         act, log_pi = self.sample(rgb_image, bounded_rgb_image)
-        q1_pi, q2_pi = self.model.critic_model(rgb_image, bounding_box_input=bounded_rgb_image, actions=act)
+        q1_pi, q2_pi = self.model.critic_model(
+            rgb_image, 
+            bounding_box_input=bounded_rgb_image, 
+            actions=act,
+            merge_layer=self.merge_layer,
+            feature_vector=self.add_feature_vector
+        )
         min_q_pi = torch.min(q1_pi, q2_pi)
         actor_loss = ((self.alpha * log_pi) - min_q_pi).mean()
 
