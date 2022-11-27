@@ -49,12 +49,12 @@ class TorchSAC(parl.Algorithm):
         self.merge_layer = merge_layer
         self.add_feature_vector = add_feature_vector
 
-    def predict(self, original_image, bounding_box_image):
+    def predict(self, original_image, bounding_box_image=None):
         act_mean, _ = self.model.policy(original_image, bounding_box_image)
         action = torch.tanh(act_mean)
         return action
 
-    def sample(self, normal_image_obs, bounded_image_obs):
+    def sample(self, normal_image_obs, bounded_image_obs=None):
         act_mean, act_log_std = self.model.policy(normal_image_obs, bounded_image_obs)
         normal = Normal(act_mean, act_log_std.exp())
         # for reparameterization trick  (mean + std*N(0,1))

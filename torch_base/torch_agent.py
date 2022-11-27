@@ -22,7 +22,10 @@ class TorchAgent(parl.Agent):
             normal_image_obs = obs
             normal_image_obs = torch.unsqueeze(torch.from_numpy(normal_image_obs).float(), dim=0).permute(0, 3, 1, 2)
             bounding_box_image_obs = None
-        action = self.alg.predict(normal_image_obs.to(self.device), bounding_box_image_obs.to(self.device))
+        if self.alg.merge_layer:
+            action = self.alg.predict(normal_image_obs.to(self.device), bounding_box_image_obs.to(self.device))
+        else:
+            action = self.alg.predict(normal_image_obs.to(self.device))
         action_numpy = action.cpu().detach().numpy().flatten()
         return action_numpy
 
@@ -35,7 +38,10 @@ class TorchAgent(parl.Agent):
             normal_image_obs = obs
             normal_image_obs = torch.unsqueeze(torch.from_numpy(normal_image_obs).float(), dim=0).permute(0, 3, 1, 2)
             bounding_box_image_obs = None
-        action, _ = self.alg.sample(normal_image_obs.to(self.device), bounding_box_image_obs.to(self.device))
+        if self.alg.merge_layer:
+            action, _ = self.alg.sample(normal_image_obs.to(self.device), bounding_box_image_obs.to(self.device))
+        else:
+            action, _ = self.alg.sample(normal_image_obs.to(self.device))
         action_numpy = action.cpu().detach().numpy().flatten()
         return action_numpy
 
