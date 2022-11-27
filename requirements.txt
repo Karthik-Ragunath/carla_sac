@@ -4,6 +4,7 @@ gym
 pygame
 opencv-python
 parl
+matplotlib
 pip install gym[box2d]
 #paddlepaddle-gpu
 ##Install paddle or torch wrt which base you are using(paddle or torch)

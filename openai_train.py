@@ -35,6 +35,12 @@ import glob
 import os
 import torch
 
+try:
+    os.environ["DISPLAY"]
+except:
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+
 GAMMA = 0.99
 TAU = 0.005
 # ALPHA = 0.2  # determines the relative importance of entropy term against the reward
@@ -75,6 +81,7 @@ MEMORY_SIZE = 60
 WARMUP_STEPS = 60
 BATCH_SIZE = 30
 SEQUENTIAL_SIZE = 30
+SEED = 123
 
 class FrictionDetector(contactListener):
     def __init__(self, env, lap_complete_percent):
@@ -540,16 +547,15 @@ class CarRacing(gym.Env, EzPickle):
         return self.step(None)[0], {}
 
     def step(self, action: Union[np.ndarray, int]):
-        throttle_or_brake, steer = action
-        if throttle_or_brake >= 0:
-            throttle = throttle_or_brake
-            brake = 0
-        else:
-            throttle = 0
-            brake = -throttle_or_brake
-
         assert self.car is not None
         if action is not None:
+            throttle_or_brake, steer = action
+            if throttle_or_brake >= 0:
+                throttle = throttle_or_brake
+                brake = 0
+            else:
+                throttle = 0
+                brake = -throttle_or_brake
             if self.continuous:
                 self.car.steer(-steer)
                 self.car.gas(throttle)
@@ -805,9 +811,9 @@ class CarRacing(gym.Env, EzPickle):
 
 def parse_arguments() -> SimpleNamespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--load_recent_model", "-load_model", description="should we load recent model?", action="store_true")
-    parser.add_argument("--model_framework", "-framework", description="which simulator/model framework is used?", default="openai", required=False)
-    parser.add_argument("--train_context", "-context", description="what is the train context?", default="actor_critic_v1", required=False)
+    parser.add_argument("--load_recent_model", "-load_model", help="should we load recent model?", action="store_true")
+    parser.add_argument("--model_framework", "-framework", help="which simulator/model framework is used?", default="openai", required=False)
+    parser.add_argument("--train_context", "-context", help="what is the train context?", default="actor_critic_v1", required=False)
     args = parser.parse_args()
     return args
 
@@ -892,7 +898,7 @@ if __name__ == "__main__":
         steps = 0
         restart = False
         while True:
-            register_input()
+            # register_input()
             if replay_memory.size() < WARMUP_STEPS:
                 action = np.random.uniform(-1, 1, size=ACTION_DIM)
             else:
