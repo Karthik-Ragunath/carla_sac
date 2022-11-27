@@ -924,7 +924,7 @@ if __name__ == "__main__":
             total_steps += 1
             if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(100):
                 agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
-                    model_framework=args.framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
+                    model_framework=args.model_framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
                 last_save_steps = total_steps
 
             if terminated or truncated or restart or quit:
