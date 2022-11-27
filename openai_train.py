@@ -827,7 +827,7 @@ if __name__ == "__main__":
     Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
     model = Model(OBSERVATION_DIM, ACTION_DIM, merge_layer=MERGE_LAYER, add_feature_vector=ADD_FEATURE_VECTOR)
 
-    logger.set_dir('./{model_framework}_logs_{context}'.format(model_framework=args.model_framework, context=args.train_context]))
+    logger.set_dir('./{model_framework}_logs_{context}'.format(model_framework=args.model_framework, context=args.train_context))
     pretrained_steps = 0
     if args.load_recent_model:
         # set the computation device
