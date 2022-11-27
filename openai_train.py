@@ -34,6 +34,7 @@ from types import SimpleNamespace
 import glob
 import os
 import torch
+from parl.utils import logger, tensorboard
 
 try:
     os.environ["DISPLAY"]
@@ -826,6 +827,7 @@ if __name__ == "__main__":
     Model, Algorithm, Agent = TorchModel, TorchSAC, TorchAgent
     model = Model(OBSERVATION_DIM, ACTION_DIM, merge_layer=MERGE_LAYER, add_feature_vector=ADD_FEATURE_VECTOR)
 
+    logger.set_dir('./{model_framework}_logs_{context}'.format(model_framework=args.model_framework, context=args.train_context]))
     pretrained_steps = 0
     if args.load_recent_model:
         # set the computation device
@@ -928,5 +930,16 @@ if __name__ == "__main__":
                 last_save_steps = total_steps
 
             if terminated or truncated or restart or quit:
+                tensorboard.add_scalar(
+                                        'train/episode_reward',
+                                        total_reward,
+                                        total_steps
+                                    )
+                logger.info(
+                    "Train env done, Reward: {reward}, Total steps until now : {total_steps}".format(
+                        reward=total_reward, 
+                        total_steps=total_steps
+                        )
+                    )
                 break
     env.close()
