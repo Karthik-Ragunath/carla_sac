@@ -929,6 +929,10 @@ if __name__ == "__main__":
                     model_framework=args.model_framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
                 last_save_steps = total_steps
 
+            # terminating every 500 steps
+            if steps == 500:
+                terminated = True
+
             if terminated or truncated or restart or quit:
                 tensorboard.add_scalar(
                                         'train/episode_reward',
