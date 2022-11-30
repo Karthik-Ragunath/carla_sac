@@ -918,11 +918,12 @@ if __name__ == "__main__":
                 batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = replay_memory.sample_sequentially(BATCH_SIZE, sequential_size=SEQUENTIAL_SIZE)
                 agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
                             batch_terminal)
-
-            if steps % 200 == 0 or terminated or truncated:
+            
+            steps += 1
+            if steps % 100 == 0 or terminated or truncated:
                 print("\naction " + str([f"{x:+0.2f}" for x in a]))
                 print(f"step {steps} total_reward {total_reward:+0.2f}")
-            steps += 1
+                logger.info(f"step {steps} total_reward {total_reward:+0.2f}")
             total_steps += 1
             if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(100):
                 agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
