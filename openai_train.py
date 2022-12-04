@@ -833,7 +833,7 @@ if __name__ == "__main__":
     if args.load_recent_model:
         # set the computation device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        filenames = glob.glob("openai_model_actor_critic_v1/*.ckpt")
+        filenames = glob.glob("openai_model_actor_critic_v3/*.ckpt")
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:
@@ -897,9 +897,9 @@ if __name__ == "__main__":
 
     quit = False
 
-    total_steps = 0
     last_save_steps = 0
     if args.mode == "train":
+        total_steps = pretrained_steps
         while not quit:
             s, _ = env.reset()
             total_reward = 0.0
@@ -951,6 +951,7 @@ if __name__ == "__main__":
                     break
         env.close()
     else:
+        total_steps = 0
         s, _ = env.reset()
         total_reward = 0.0
         steps = 0

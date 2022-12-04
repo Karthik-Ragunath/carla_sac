@@ -13,11 +13,13 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "args": [
-                // "--load_recent_model",
+                "--load_recent_model",
                 "--model_framework",
                 "openai",
                 "--train_context",
-                "actor_critic_v2"
+                "actor_critic_v2",
+                "--mode",
+                "infer"
             ]
         },
         {
