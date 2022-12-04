@@ -816,6 +816,7 @@ def parse_arguments() -> SimpleNamespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--load_recent_model", "-load_model", help="should we load recent model?", action="store_true")
     parser.add_argument("--model_framework", "-framework", help="which simulator/model framework is used?", default="openai", required=False)
+    parser.add_argument("--mode", "-m", help="train or evaluate", default="train", required=False)
     parser.add_argument("--train_context", "-context", help="what is the train context?", default="actor_critic_v1", required=False)
     args = parser.parse_args()
     return args
@@ -898,53 +899,88 @@ if __name__ == "__main__":
 
     total_steps = 0
     last_save_steps = 0
-    while not quit:
+    if args.mode == "train":
+        while not quit:
+            s, _ = env.reset()
+            total_reward = 0.0
+            steps = 0
+            restart = False
+            while True:
+                # register_input()
+                if replay_memory.size() < WARMUP_STEPS:
+                    action = np.random.uniform(-1, 1, size=ACTION_DIM)
+                else:
+                    action = agent.sample(s)
+                next_state, r, terminated, truncated, info = env.step(action)
+                total_reward += r
+                replay_memory.append(s, action, r, next_state, terminated)
+                s = next_state
+
+                if replay_memory.size() >= WARMUP_STEPS:
+                    batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = replay_memory.sample_sequentially(BATCH_SIZE, sequential_size=SEQUENTIAL_SIZE)
+                    agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
+                                batch_terminal)
+                
+                steps += 1
+                if steps % 100 == 0 or terminated or truncated:
+                    print("\naction " + str([f"{x:+0.2f}" for x in a]))
+                    print(f"step {steps} total_reward {total_reward:+0.2f}")
+                    logger.info(f"step {steps} total_reward {total_reward:+0.2f}")
+                total_steps += 1
+                if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(100):
+                    agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
+                        model_framework=args.model_framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
+                    last_save_steps = total_steps
+
+                # terminating every 500 steps
+                if steps == 500:
+                    terminated = True
+
+                if terminated or truncated or restart or quit:
+                    tensorboard.add_scalar(
+                                            'train/episode_reward',
+                                            total_reward,
+                                            total_steps
+                                        )
+                    logger.info(
+                        "Train env done, Reward: {reward}, Total steps until now : {total_steps}".format(
+                            reward=total_reward, 
+                            total_steps=total_steps
+                            )
+                        )
+                    break
+        env.close()
+    else:
         s, _ = env.reset()
         total_reward = 0.0
         steps = 0
         restart = False
         while True:
-            # register_input()
-            if replay_memory.size() < WARMUP_STEPS:
-                action = np.random.uniform(-1, 1, size=ACTION_DIM)
-            else:
-                action = agent.sample(s)
+            action = agent.sample(s)
             next_state, r, terminated, truncated, info = env.step(action)
             total_reward += r
-            replay_memory.append(s, action, r, next_state, terminated)
             s = next_state
-
-            if replay_memory.size() >= WARMUP_STEPS:
-                batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = replay_memory.sample_sequentially(BATCH_SIZE, sequential_size=SEQUENTIAL_SIZE)
-                agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
-                            batch_terminal)
-            
             steps += 1
+            if steps == 500:
+                terminated = True
             if steps % 100 == 0 or terminated or truncated:
                 print("\naction " + str([f"{x:+0.2f}" for x in a]))
                 print(f"step {steps} total_reward {total_reward:+0.2f}")
                 logger.info(f"step {steps} total_reward {total_reward:+0.2f}")
-            total_steps += 1
-            if total_steps > int(WARMUP_STEPS) and total_steps > last_save_steps + int(100):
-                agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
-                    model_framework=args.model_framework, current_steps=(total_steps + pretrained_steps), train_context=args.train_context))
-                last_save_steps = total_steps
-
-            # terminating every 500 steps
-            if steps == 500:
-                terminated = True
-
             if terminated or truncated or restart or quit:
                 tensorboard.add_scalar(
-                                        'train/episode_reward',
-                                        total_reward,
-                                        total_steps
-                                    )
+                    'evaluate/episode_reward',
+                    total_reward,
+                    steps
+                )
                 logger.info(
-                    "Train env done, Reward: {reward}, Total steps until now : {total_steps}".format(
+                    "Evaluate env done, Reward: {reward}, steps until now : {total_steps}".format(
                         reward=total_reward, 
-                        total_steps=total_steps
-                        )
+                        total_steps=steps
                     )
+                )
                 break
-    env.close()
+        env.close()
+
+            
+        
