@@ -833,7 +833,7 @@ if __name__ == "__main__":
     if args.load_recent_model:
         os.environ['TORCH_HOME'] = os.path.join(torch.hub.get_dir(), 'checkpoints')
         # set the computation device
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         filenames = glob.glob("openai_model_actor_critic_v3/*.ckpt")
         model_filename = None
         max_train_epoch = 0
