@@ -831,6 +831,7 @@ if __name__ == "__main__":
     logger.set_dir('./{model_framework}_logs_{context}'.format(model_framework=args.model_framework, context=args.train_context))
     pretrained_steps = 0
     if args.load_recent_model:
+        os.environ['TORCH_HOME'] = os.path.join(torch.hub.get_dir(), 'checkpoints')
         # set the computation device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         filenames = glob.glob("openai_model_actor_critic_v3/*.ckpt")
@@ -842,6 +843,8 @@ if __name__ == "__main__":
                 max_train_epoch = epoch_num
                 model_filename = filename
                 pretrained_steps = max_train_epoch
+        # HARD-FIX
+        model_filename = "/home/kxa200005/carla_sac/openai_model_actor_critic_v3/step_300576_model.ckpt"
         if model_filename:
             model.load_state_dict(torch.load(
                 os.path.join(os.getcwd(), model_filename), map_location=device
@@ -898,8 +901,8 @@ if __name__ == "__main__":
     quit = False
 
     last_save_steps = 0
+    total_steps = 0
     if args.mode == "train":
-        total_steps = pretrained_steps
         while not quit:
             s, _ = env.reset()
             total_reward = 0.0
@@ -940,18 +943,17 @@ if __name__ == "__main__":
                     tensorboard.add_scalar(
                                             'train/episode_reward',
                                             total_reward,
-                                            total_steps
+                                            total_steps + pretrained_steps
                                         )
                     logger.info(
                         "Train env done, Reward: {reward}, Total steps until now : {total_steps}".format(
                             reward=total_reward, 
-                            total_steps=total_steps
+                            total_steps=total_steps + pretrained_steps
                             )
                         )
                     break
         env.close()
     else:
-        total_steps = 0
         s, _ = env.reset()
         total_reward = 0.0
         steps = 0

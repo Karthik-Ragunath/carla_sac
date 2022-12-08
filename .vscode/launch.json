@@ -17,9 +17,9 @@
                 "--model_framework",
                 "openai",
                 "--train_context",
-                "actor_critic_v2",
+                "actor_critic_v5",
                 "--mode",
-                "infer"
+                "train"
             ]
         },
         {
