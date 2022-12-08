@@ -6,11 +6,10 @@ __all__ = ['TorchAgent']
 
 
 class TorchAgent(parl.Agent):
-    def __init__(self, algorithm):
+    def __init__(self, algorithm, device_id="0"):
         super(TorchAgent, self).__init__(algorithm)
-        # print("TorchAgent Called")
-        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-        # self.device = "cpu"
+        self.device_id = device_id
+        self.device = torch.device(f"cuda:{self.device_id}" if torch.cuda.is_available() else "cpu")
         self.alg.sync_target(decay=0)
 
     def predict(self, obs):

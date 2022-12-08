@@ -19,7 +19,9 @@
                 "--train_context",
                 "actor_critic_v5",
                 "--mode",
-                "train"
+                "train",
+                "--device_id",
+                "1"
             ]
         },
         {

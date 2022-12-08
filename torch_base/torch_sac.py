@@ -4,7 +4,6 @@ from torch.distributions import Normal
 import torch.nn.functional as F
 from copy import deepcopy
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
 
 __all__ = ['TorchSAC']
@@ -20,7 +19,8 @@ class TorchSAC(parl.Algorithm):
                  actor_lr=None,
                  critic_lr=None,
                  merge_layer=True,
-                 add_feature_vector=False):
+                 add_feature_vector=False,
+                 device_id="0"):
         """ SAC algorithm
             Args:
                 model(parl.Model): forward network of actor and critic.
@@ -40,7 +40,9 @@ class TorchSAC(parl.Algorithm):
         self.alpha = alpha
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
-        self.model = model.to(device)
+        self.device_id = device_id
+        self.device = torch.device(f"cuda:{self.device_id}" if torch.cuda.is_available() else "cpu")
+        self.model = model.to(self.device)
         self.target_model = deepcopy(self.model)
         self.actor_optimizer = torch.optim.Adam(
             self.model.actor_model.parameters(), lr=actor_lr)

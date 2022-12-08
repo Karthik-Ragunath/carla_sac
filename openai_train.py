@@ -818,6 +818,7 @@ def parse_arguments() -> SimpleNamespace:
     parser.add_argument("--model_framework", "-framework", help="which simulator/model framework is used?", default="openai", required=False)
     parser.add_argument("--mode", "-m", help="train or evaluate", default="train", required=False)
     parser.add_argument("--train_context", "-context", help="what is the train context?", default="actor_critic_v1", required=False)
+    parser.add_argument("--device_id", "-dev_id", help="Specify the device id", default="0", required=False)
     args = parser.parse_args()
     return args
 
@@ -833,7 +834,7 @@ if __name__ == "__main__":
     if args.load_recent_model:
         os.environ['TORCH_HOME'] = os.path.join(torch.hub.get_dir(), 'checkpoints')
         # set the computation device
-        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+        device = torch.device(f"cuda:{args.device_id}" if torch.cuda.is_available() else "cpu")
         filenames = glob.glob("openai_model_actor_critic_v3/*.ckpt")
         model_filename = None
         max_train_epoch = 0
@@ -858,9 +859,10 @@ if __name__ == "__main__":
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR,
         merge_layer=MERGE_LAYER,
-        add_feature_vector=ADD_FEATURE_VECTOR
+        add_feature_vector=ADD_FEATURE_VECTOR,
+        device_id=args.device_id
     )
-    agent = Agent(algorithm)
+    agent = Agent(algorithm, device_id=args.device_id)
     
     replay_memory = ReplayMemory(
         max_size=MEMORY_SIZE, obs_dim=OBSERVATION_DIM, act_dim=ACTION_DIM, openai_mode=True, merge_images=False
