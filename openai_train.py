@@ -835,7 +835,7 @@ if __name__ == "__main__":
         os.environ['TORCH_HOME'] = os.path.join(torch.hub.get_dir(), 'checkpoints')
         # set the computation device
         device = torch.device(f"cuda:{args.device_id}" if torch.cuda.is_available() else "cpu")
-        filenames = glob.glob("openai_model_actor_critic_v3/*.ckpt")
+        filenames = glob.glob("openai_model_actor_critic_v5/*.ckpt")
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:
@@ -845,7 +845,8 @@ if __name__ == "__main__":
                 model_filename = filename
                 pretrained_steps = max_train_epoch
         # HARD-FIX
-        model_filename = "/home/kxa200005/carla_sac/openai_model_actor_critic_v3/step_300576_model.ckpt"
+        # model_filename = "/home/kxa200005/carla_sac/openai_model_actor_critic_v3/step_300576_model.ckpt"
+        model_filename = "/home/kxa200005/carla_sac/openai_model_actor_critic_v5/step_528230_model.ckpt"
         if model_filename:
             model.load_state_dict(torch.load(
                 os.path.join(os.getcwd(), model_filename), map_location=device
@@ -938,7 +939,7 @@ if __name__ == "__main__":
                     last_save_steps = total_steps
 
                 # terminating every 500 steps
-                if steps == 500:
+                if steps == 1500:
                     terminated = True
 
                 if terminated or truncated or restart or quit:
@@ -966,7 +967,7 @@ if __name__ == "__main__":
             total_reward += r
             s = next_state
             steps += 1
-            if steps == 500:
+            if steps == 1500:
                 terminated = True
             if steps % 100 == 0 or terminated or truncated:
                 print("\naction " + str([f"{x:+0.2f}" for x in a]))
