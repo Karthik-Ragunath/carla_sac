@@ -14,16 +14,16 @@ class Agent():
     ppo_epoch = 10
     buffer_capacity, batch_size = 2000, 128
 
-    # TODO: added device, args as an argument
     def __init__(self, device, args):
+        self.args = args
         self.device = device
         self.transition_type = np.dtype(
             [
                 ('s', np.float64, 
-                (args.img_stack, 96, 96)), 
+                (self.args.img_stack, 96, 96)), 
                 ('a', np.float64, (3,)), 
                 ('a_logp', np.float64),
-                ('r', np.float64), ('s_', np.float64, (args.img_stack, 96, 96))
+                ('r', np.float64), ('s_', np.float64, (self.args.img_stack, 96, 96))
             ]
         )
         self.training_step = 0
@@ -62,8 +62,7 @@ class Agent():
         else:
             return False
 
-    # TODO: send args as a param
-    def update(self, args):
+    def update(self):
         self.training_step += 1
 
         s = torch.tensor(self.buffer['s'], dtype=torch.double).to(self.device)
@@ -74,7 +73,7 @@ class Agent():
         old_a_logp = torch.tensor(self.buffer['a_logp'], dtype=torch.double).to(self.device).view(-1, 1)
 
         with torch.no_grad():
-            target_v = r + args.gamma * self.net(s_)[1]
+            target_v = r + self.args.gamma * self.net(s_)[1]
             adv = target_v - self.net(s)[1]
             # adv = (adv - adv.mean()) / (adv.std() + 1e-8)
 
