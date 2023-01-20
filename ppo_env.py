@@ -6,7 +6,6 @@ class Env():
     Environment wrapper for CarRacing 
     """
 
-    # TODO: added args to __init__
     def __init__(self, args):
         self.args = args
         if self.args.render:
