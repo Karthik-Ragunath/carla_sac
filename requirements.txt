@@ -6,6 +6,7 @@ opencv-python
 parl
 matplotlib
 pip install gym[box2d]
+visdom
 #paddlepaddle-gpu
 ##Install paddle or torch wrt which base you are using(paddle or torch)
 #--find-links https://download.pytorch.org/whl/torch_stable.html
