@@ -9,13 +9,10 @@ class Env():
     Environment wrapper for CarRacing 
     """
 
-    def __init__(self, args):
+    # TODO: Pass train_env_params, train_context_name when initializing
+    def __init__(self, args, train_env_params, train_context_name):
         self.args = args
-        if self.args.render:
-            self.env = gym.make('CarRacing-v2', render_mode="human")
-        else:
-            self.env = gym.make('CarRacing-v2')
-        # self.env.seed(self.args.seed)
+        self.env = CarlaEnv(env_name=args.env_name, params=train_env_params, context=train_context_name)
         self.reward_threshold = self.env.spec.reward_threshold
 
     def reset(self):
