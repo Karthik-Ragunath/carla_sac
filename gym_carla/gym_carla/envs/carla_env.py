@@ -282,6 +282,8 @@ class CarlaEnv(gym.Env):
                     (self.actors.pop()).destroy()
                 self._make_carla_client('localhost', self.port)
 
+    # Step Function - CARLA
+    '''
     def step(self, action):
         try:
             # Assign acc/steer/brake to action signal
@@ -333,6 +335,49 @@ class CarlaEnv(gym.Env):
             self.logger.error(e)
             time.sleep(2)
             return (0.0, True), self.current_image
+    '''
+
+    # PPO Step function
+    def step(self, action):
+        try:
+            current_action = np.array(action) + self.last_action
+            current_action = np.clip(
+                current_action, -1.0, 1.0)
+            throttle_or_brake, steer = current_action
+
+            if throttle_or_brake >= 0:
+                throttle = throttle_or_brake
+                brake = 0
+            else:
+                throttle = 0
+                brake = -throttle_or_brake
+
+            # Apply control
+            act = carla.VehicleControl(
+                throttle=float(throttle),
+                steer=float(steer),
+                brake=float(brake))
+            self.ego.apply_control(act)
+
+            for _ in range(4):
+                self.world.tick()
+
+            # Update timesteps
+            self.time_step += 1
+            self.total_step += 1
+            self.last_action = current_action
+
+            # calculate reward
+            isDone = self._terminal()
+            current_reward = self.get_reward_bounding_boxes()
+
+            return self.current_image, current_reward, isDone, None, None
+
+        except Exception as e:
+            self.logger.error("Env step() error")
+            self.logger.error(e)
+            time.sleep(2)
+            return self.current_image, current_reward, isDone, None, None
 
     def render(self, mode='human'):
         pass
