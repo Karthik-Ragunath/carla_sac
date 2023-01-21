@@ -9,7 +9,6 @@ class Env():
     Environment wrapper for CarRacing 
     """
 
-    # TODO: Pass train_env_params, train_context_name when initializing
     def __init__(self, args, train_env_params, train_context_name):
         self.args = args
         self.env = CarlaEnv(env_name=args.env_name, params=train_env_params, context=train_context_name)

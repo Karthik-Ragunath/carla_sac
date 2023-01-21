@@ -6,6 +6,7 @@ import logging
 from torch.utils.tensorboard import SummaryWriter
 from torch_base.torch_agent_ppo import Agent
 from ppo_env import Env
+from env_config import EnvConfig
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -36,7 +37,7 @@ LOGGER.addHandler(handler)
 if __name__ == '__main__':
     writer = SummaryWriter()
     agent = Agent(device=device, args=args)
-    env = Env(args=args)
+    env = Env(args=args, train_env_params=EnvConfig['train_env_params'], train_context_name=EnvConfig['train_context'])
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
 

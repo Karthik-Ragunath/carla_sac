@@ -64,6 +64,7 @@ test_env_params['load_recent_model'] = False
 EnvConfig = {
     # train envs config
     'train_envs_params': train_envs_params,
+    'train_env_params': train_envs_params,
 
     # eval env config
     'eval_env_params': eval_env_params,
