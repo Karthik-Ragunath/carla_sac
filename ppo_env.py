@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from torch_base.detect_bounding_boxes import DetectBoundingBox
 import matplotlib.pyplot as plt
+import os
 
 
 class Env():
@@ -12,13 +13,14 @@ class Env():
     def __init__(self, args, train_env_params, train_context_name):
         self.args = args
         self.env = CarlaEnv(env_name=args.env_name, params=train_env_params, context=train_context_name)
-        self.reward_threshold = self.env.spec.reward_threshold
 
     def reset(self):
         self.counter = 0
         self.av_r = self.reward_memory()
 
         self.die = False
+        # TODO: Hard-coding zero index for retrieving actual RGB image alone and not bounding box image
+        # TODO: Make it config driven to retrieve both images
         img_rgb = self.env.reset()[0]
         img_gray = self.rgb2gray(img_rgb)
         self.stack = [img_gray] * self.args.img_stack  # four frames for decision
@@ -27,7 +29,8 @@ class Env():
     def step(self, action):
         total_reward = 0
         for i in range(self.args.action_repeat):
-            img_rgb, reward, die, _, _ = self.env.step(action)
+            img_rgb_tuple, reward, die, _, _ = self.env.step(action)
+            img_rgb = img_rgb_tuple[0]
             # don't penalize "die state"
             if die:
                 reward += 100
@@ -131,6 +134,7 @@ class CarlaEnv(object):
             print("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
 
+    '''
     def step(self, action, is_validation=False):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
             'the action should be in range [-1.0, 1.0]'
@@ -155,4 +159,26 @@ class CarlaEnv(object):
                 plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")
-        return action_out, numpy_rgb_image, bounded_image
+        return (action_out, numpy_rgb_image, bounded_image)
+    '''
+
+    def step(self, action, is_validation=False):
+        mapped_action = np.clip(action, self.action_space.low, self.action_space.high)
+        current_image, reward, die, _, _ = self.env.step(mapped_action)
+        bounded_image = None
+        numpy_rgb_image = None
+        if current_image:
+            numpy_rgb_image = self.to_rgb_array(current_image)
+            faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
+            bounded_image = faster_rcnn_obj.detect_bounding_boxes()
+            if self.save_episode or is_validation:
+                fig = plt.figure()
+                plt.imshow(bounded_image)
+                if is_validation:
+                    plt.savefig(os.path.join(os.getcwd(), self.valid_vis_dir, str(self.eval_episode_num), (str(current_image.frame) + '.png')))
+                else:
+                    plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.close(fig)
+        else:
+            print("NO IMAGE DETECTED FOR NOW IN STEP")
+        return (numpy_rgb_image, bounded_image), reward, die, _, _
