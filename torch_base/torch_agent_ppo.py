@@ -4,6 +4,7 @@ import numpy as np
 import torch.optim as optim
 from torch.distributions import Beta
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
+import torch.nn.functional as F
 
 class Agent():
     """

@@ -412,6 +412,7 @@ class CarlaEnv(gym.Env):
             self.logger.debug('Time out! Episode cost %d steps in route %d.' %
                               (self.time_step, self.route_id))
             self.isTimeOut = True
+            return True
 
         return False
 
