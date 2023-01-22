@@ -14,8 +14,8 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--render",
-                "--device_id",
-                "1",
+                // "--device_id",
+                // "1",
                 "--img-stack",
                 "4",
                 "--log_seed",
