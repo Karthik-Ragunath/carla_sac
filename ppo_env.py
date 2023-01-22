@@ -15,7 +15,7 @@ class Env():
 
     def __init__(self, args, train_env_params, train_context_name):
         self.args = args
-        self.env = CarlaEnv(env_name=args.env_name, params=train_env_params, context=train_context_name)
+        self.env = CarlaEnv(env_name='carla-v0', params=train_env_params, context=train_context_name)
 
     def reset(self):
         self.counter = 0
