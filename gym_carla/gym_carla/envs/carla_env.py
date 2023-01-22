@@ -340,17 +340,11 @@ class CarlaEnv(gym.Env):
     # PPO Step function
     def step(self, action):
         try:
-            current_action = np.array(action) + self.last_action
-            current_action = np.clip(
-                current_action, -1.0, 1.0)
-            throttle_or_brake, steer = current_action
-
-            if throttle_or_brake >= 0:
-                throttle = throttle_or_brake
-                brake = 0
-            else:
-                throttle = 0
-                brake = -throttle_or_brake
+            current_action = np.array(action)
+            throttle, brake, steer = current_action
+            throttle = np.clip(throttle, 0, 1)
+            brake = np.clip(brake, 0, 1)
+            steer = np.clip(steer, -1, 1)
 
             # Apply control
             act = carla.VehicleControl(
