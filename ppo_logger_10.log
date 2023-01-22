@@ -1,0 +1,29 @@
+carla-debug Env running in port 2021
+carla-debug connecting to Carla server...
+carla-debug Host: 127.0.0.1 Port: 2021
+carla-debug Carla server port 2021 connected!
+root start training
+carla-debug Collision happened! Episode cost 14 steps in route 1.
+root Ep 0	Last score: -290.18	Moving average score: -2.90
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 1	Last score: 251.70	Moving average score: -0.36
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 2	Last score: 277.43	Moving average score: 2.42
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 3	Last score: 200.16	Moving average score: 4.40
+carla-debug Collision happened! Episode cost 15 steps in route 1.
+root Ep 4	Last score: -285.94	Moving average score: 1.50
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 5	Last score: 254.93	Moving average score: 4.03
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 6	Last score: 228.38	Moving average score: 6.27
+carla-debug Collision happened! Episode cost 23 steps in route 1.
+root Ep 7	Last score: -260.88	Moving average score: 3.60
+carla-debug Collision happened! Episode cost 14 steps in route 1.
+root Ep 8	Last score: -291.13	Moving average score: 0.66
+carla-debug Collision happened! Episode cost 16 steps in route 1.
+root Ep 9	Last score: -271.48	Moving average score: -2.07
+carla-debug Time out! Episode cost 1000 steps in route 1.
+root Ep 10	Last score: 212.63	Moving average score: 0.08
+carla-debug Collision happened! Episode cost 18 steps in route 1.
+root Ep 11	Last score: -262.19	Moving average score: -2.54
