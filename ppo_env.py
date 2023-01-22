@@ -3,6 +3,7 @@ import numpy as np
 from torch_base.detect_bounding_boxes import DetectBoundingBox
 import matplotlib.pyplot as plt
 import os
+# from skimage.transform import resize
 
 
 class Env():
@@ -93,6 +94,7 @@ class CarlaEnv(object):
             def sample(self):
                 return self.action_space.sample()
         self.env = gym.make(env_name, params=params)
+        self.params = params
         self._max_episode_steps = int(params['max_time_episode'])
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
