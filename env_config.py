@@ -5,7 +5,7 @@ from copy import deepcopy
 #      Lane         250
 #      Long         200
 TASK_MODE = 'Lane'
-MAX_EPISODE_STEPS = 250
+MAX_EPISODE_STEPS = 1000
 # MAX_EPISODE_STEPS = 475
 OPEN_AI_IMPLEMENTATION = False
 
