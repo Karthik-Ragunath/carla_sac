@@ -7,7 +7,7 @@ parl
 matplotlib
 pip install gym[box2d]
 visdom
-carla
+carla==0.9.13
 scikit-image
 tensorboard
 #paddlepaddle-gpu

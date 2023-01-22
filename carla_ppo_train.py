@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch_base.torch_agent_ppo import Agent
 from ppo_env import Env
 from env_config import EnvConfig
+import os
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -47,6 +48,9 @@ if __name__ == '__main__':
     best_episode_reward = 0
     best_episode_running_score = 0
     LOGGER.info("start training")
+    # Remove hardcoding directory where models are stored.
+    if not os.path.exists('param'):
+        os.makedirs('param')
     for i_ep in range(200000):
         score = 0
         state = env.reset()
@@ -83,6 +87,7 @@ if __name__ == '__main__':
                 draw_reward(xdata=i_ep, ydata=running_score)
             print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
             agent.save_param()
-        if running_score > env.reward_threshold:
+        # TODO: Removing hard-coding reward threshild
+        if running_score > 2000:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
             break

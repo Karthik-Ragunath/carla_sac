@@ -47,8 +47,10 @@ class CarlaEnv(gym.Env):
         '''
 
         # action and observation space
+        # self.action_space = spaces.Box(
+        #     np.array([-2.0, -2.0]), np.array([2.0, 2.0]), dtype=np.float32)
         self.action_space = spaces.Box(
-            np.array([-2.0, -2.0]), np.array([2.0, 2.0]), dtype=np.float32)
+            np.array([-1.0, 0.0, 0.0]), np.array([1.0, 1.0, 1.0]), dtype=np.float32)
         self.observation_space = spaces.Box(
             low=-50.0, high=50.0, shape=(512,), dtype=np.float32)
 
@@ -369,13 +371,13 @@ class CarlaEnv(gym.Env):
             isDone = self._terminal()
             current_reward = self.get_reward_bounding_boxes()
 
-            return self.current_image, current_reward, isDone, None, None
+            return self.current_image, current_reward, isDone, False, {}
 
         except Exception as e:
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return self.current_image, current_reward, isDone, None, None
+            return self.current_image, current_reward, isDone, False, {}
 
     def render(self, mode='human'):
         pass
