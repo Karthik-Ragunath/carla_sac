@@ -6,16 +6,21 @@ import os
 # from skimage.transform import resize
 import logging
 
+# Necessary to create custom gym environments
+import gym_carla
+
+
 LOGGER = logging.getLogger(__name__)
 
-class Env():
+class Env(object):
     """
     Environment wrapper for CarRacing 
     """
-
     def __init__(self, args, train_env_params, train_context_name):
         self.args = args
         self.env = CarlaEnv(env_name='carla-v0', params=train_env_params, context=train_context_name)
+        self.obs_dim = self.env.env.observation_space.shape[0]
+        self.action_dim = self.env.env.action_space.shape[0]
 
     def reset(self):
         self.counter = 0
