@@ -4,7 +4,9 @@ from torch_base.detect_bounding_boxes import DetectBoundingBox
 import matplotlib.pyplot as plt
 import os
 # from skimage.transform import resize
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 class Env():
     """
@@ -133,7 +135,7 @@ class CarlaEnv(object):
                 plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
-            print("NO IMAGE DETECTED FOR NOW IN RESET")
+            LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
 
     '''
@@ -182,5 +184,5 @@ class CarlaEnv(object):
                     plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
-            print("NO IMAGE DETECTED FOR NOW IN STEP")
+            LOGGER.error("NO IMAGE DETECTED FOR NOW IN STEP")
         return (numpy_rgb_image, bounded_image), reward, die, _, _

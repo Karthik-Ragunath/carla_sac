@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ppo_carla_racing",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/carla_ppo_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                // "--render",
+                "--device_id",
+                "1",
+                "--img-stack",
+                "4"
+            ]
+        },
+        {
             "name": "openai_racing",
             "type": "python",
             "request": "launch",
