@@ -27,7 +27,7 @@ class Agent():
             ]
         )
         self.training_step = 0
-        self.net = Net().double().to(self.device)
+        self.net = Net(args.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition_type)
         self.counter = 0
         self.optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
