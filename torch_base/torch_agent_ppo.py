@@ -5,6 +5,9 @@ import torch.optim as optim
 from torch.distributions import Beta
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import torch.nn.functional as F
+from typing import Tuple
+import glob
+import os
 
 class Agent():
     """
@@ -32,6 +35,25 @@ class Agent():
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition_type)
         self.counter = 0
         self.optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
+
+    def load_model(self, env_params: dict, file_dir_path: str) -> Tuple[str, int]:
+        if env_params.get('load_recent_model', False):
+            # set the computation device
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            filenames = glob.glob(os.path.join(file_dir_path, "*.pkl"))
+            model_filename = None
+            max_train_epoch = 0
+            for filename in filenames:
+                epoch_num = int(filename.split('/')[-1].split('_')[1])
+                if epoch_num > max_train_epoch:
+                    max_train_epoch = epoch_num
+                    model_filename = filename
+                    pretrained_steps = max_train_epoch
+            if model_filename:
+                self.net.load_state_dict(torch.load(
+                    os.path.join(os.getcwd(), model_filename), map_location=device
+                ))
+        pass
 
     def select_action(self, state):
         state = torch.from_numpy(state).double().to(self.device).unsqueeze(0)
