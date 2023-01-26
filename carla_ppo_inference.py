@@ -27,11 +27,10 @@ if use_cuda:
 if __name__ == "__main__":
     agent = Agent(device=device)
     agent.load_param(file_dir_path="param")
-    env = Env()
+    env = Env(args=args, env_params=EnvConfig['test_env_params'], train_context_name=EnvConfig['train_context'])
 
     training_records = []
     running_score = 0
-    state = env.reset()
     for i_ep in range(10):
         score = 0
         state = env.reset()

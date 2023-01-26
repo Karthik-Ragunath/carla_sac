@@ -16,9 +16,9 @@ class Env(object):
     """
     Environment wrapper for CarRacing 
     """
-    def __init__(self, args, train_env_params, train_context_name):
+    def __init__(self, args, env_params, train_context_name):
         self.args = args
-        self.env = CarlaEnv(env_name='carla-v0', params=train_env_params, context=train_context_name)
+        self.env = CarlaEnv(env_name='carla-v0', params=env_params, context=train_context_name)
         self.obs_dim = self.env.env.observation_space.shape[0]
         self.action_dim = self.env.env.action_space.shape[0]
 
