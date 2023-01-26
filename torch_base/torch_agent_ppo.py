@@ -39,7 +39,6 @@ class Agent():
     def load_model(self, env_params: dict, file_dir_path: str) -> Tuple[str, int]:
         if env_params.get('load_recent_model', False):
             # set the computation device
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             filenames = glob.glob(os.path.join(file_dir_path, "*.pkl"))
             model_filename = None
             max_train_epoch = 0
@@ -51,7 +50,7 @@ class Agent():
                     pretrained_steps = max_train_epoch
             if model_filename:
                 self.net.load_state_dict(torch.load(
-                    os.path.join(os.getcwd(), model_filename), map_location=device
+                    os.path.join(os.getcwd(), model_filename), map_location=self.device
                 ))
         pass
 
