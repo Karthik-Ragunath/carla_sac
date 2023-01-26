@@ -5,6 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ppo_carla_racing_inference",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/carla_ppo_inference.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                // "--render",
+                // "--device_id",
+                // "1",
+                "--img-stack",
+                "20",
+                "--log_seed",
+                "12"
+            ]
+        },
+        {
             "name": "ppo_carla_racing",
             "type": "python",
             "request": "launch",
@@ -17,9 +35,11 @@
                 // "--device_id",
                 // "1",
                 "--img-stack",
-                "20",
+                "21",
                 "--log_seed",
-                "1"
+                "1",
+                "--checkpoints_save_dir",
+                "param_1"
             ]
         },
         {

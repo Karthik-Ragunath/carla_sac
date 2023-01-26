@@ -52,6 +52,7 @@ temp_params['port'] = eval_port
 temp_params['code_mode'] = eval_code_mode
 eval_env_params = temp_params
 eval_env_params['load_recent_model'] = False
+eval_env_params['image_dimensions'] = (96, 96)
 
 # test env params
 test_port = 2029
@@ -61,6 +62,7 @@ temp_params['port'] = test_port
 temp_params['code_mode'] = test_code_mode
 test_env_params = temp_params
 test_env_params['load_recent_model'] = False
+test_env_params['image_dimensions'] = (96, 96)
 
 EnvConfig = {
     # train envs config

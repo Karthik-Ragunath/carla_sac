@@ -20,6 +20,7 @@ parser.add_argument(
     '--log-interval', type=int, default=10, metavar='N', help='interval between training status logs (default: 10)')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
+parser.add_argument("--checkpoints_save_dir", type=str, default="param", required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -49,8 +50,8 @@ if __name__ == '__main__':
     best_episode_running_score = 0
     LOGGER.info("start training")
     # Remove hardcoding directory where models are stored.
-    if not os.path.exists('param'):
-        os.makedirs('param')
+    if not os.path.exists(args.checkpoints_save_dir):
+        os.makedirs(args.checkpoints_save_dir)
     for i_ep in range(200000):
         score = 0
         state = env.reset()

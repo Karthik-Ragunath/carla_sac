@@ -16,6 +16,7 @@ parser.add_argument('--img-stack', type=int, default=4, metavar='N', help='stack
 parser.add_argument('--seed', type=int, default=0, metavar='N', help='random seed (default: 0)')
 parser.add_argument('--render', action='store_true', help='render the environment')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
+parser.add_argument("--log_seed", type=int, default=0, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -24,8 +25,15 @@ torch.manual_seed(args.seed)
 if use_cuda:
     torch.cuda.manual_seed(args.seed)
 
+LOGGER= logging.getLogger()
+LOGGER.setLevel(logging.DEBUG) # or whatever
+handler = logging.FileHandler(f"ppo_logger_inference_{args.log_seed}.log", 'w', 'utf-8')
+formatter = logging.Formatter('%(name)s %(message)s')
+handler.setFormatter(formatter)
+LOGGER.addHandler(handler)
+
 if __name__ == "__main__":
-    agent = Agent(device=device)
+    agent = Agent(device=device, args=args)
     agent.load_param(file_dir_path="param")
     env = Env(args=args, env_params=EnvConfig['test_env_params'], train_context_name=EnvConfig['train_context'])
 
@@ -45,4 +53,4 @@ if __name__ == "__main__":
             if done or die:
                 break
 
-        print('Ep {}\tScore: {:.2f}\t'.format(i_ep, score))
+        LOGGER.info('Ep {}\tScore: {:.2f}\t'.format(i_ep, score))

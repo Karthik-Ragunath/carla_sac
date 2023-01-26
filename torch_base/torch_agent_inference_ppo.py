@@ -8,14 +8,16 @@ import torch.nn.functional as F
 from typing import Tuple
 import glob
 import os
+from pathlib import Path
 
 class Agent():
     """
     Agent for testing
     """
-    def __init__(self, device):
+    def __init__(self, device, args):
+        self.args = args
         self.device = device
-        self.net = Net().float().to(self.device)
+        self.net = Net(self.args.img_stack).float().to(self.device)
 
     def select_action(self, state):
         state = torch.from_numpy(state).float().to(self.device).unsqueeze(0)
@@ -30,10 +32,12 @@ class Agent():
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:
-            epoch_num = int(filename.split('/')[-1].split('_')[1])
+            complete_path = filename 
+            filename = Path(filename).stem
+            epoch_num = int(filename.split('_')[-1])
             if epoch_num > max_train_epoch:
                 max_train_epoch = epoch_num
-                model_filename = filename
+                model_filename = complete_path
                 pretrained_steps = max_train_epoch
         if model_filename:
             self.net.load_state_dict(torch.load(

@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from typing import Tuple
 import glob
 import os
+from pathlib import Path
 
 class Agent():
     """
@@ -31,7 +32,7 @@ class Agent():
             ]
         )
         self.training_step = 0
-        self.net = Net(args.img_stack).double().to(self.device)
+        self.net = Net(self.args.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition_type)
         self.counter = 0
         self.optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
@@ -43,7 +44,8 @@ class Agent():
             model_filename = None
             max_train_epoch = 0
             for filename in filenames:
-                epoch_num = int(filename.split('/')[-1].split('_')[1])
+                filename = Path(filename).stem
+                epoch_num = int(filename.split('_')[-1])
                 if epoch_num > max_train_epoch:
                     max_train_epoch = epoch_num
                     model_filename = filename
@@ -67,13 +69,13 @@ class Agent():
         return action, a_logp
 
     def save_param(self):
-        torch.save(self.net.state_dict(), 'param/ppo_net_params_model_trained.pkl')
+        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, 'ppo_net_params_model_trained.pkl'))
     
     def save_checkpoint_reward(self, episode):
-        torch.save(self.net.state_dict(), f"param/reward_checkpoint_{episode}.pkl")
+        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, f"reward_checkpoint_{episode}.pkl"))
 
     def save_checkpoint_running_score(self, episode):
-        torch.save(self.net.state_dict(), f"param/run_score_checkpoint_{episode}.pkl")
+        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, f"run_score_checkpoint_{episode}.pkl"))
 
     def store(self, transition):
         self.buffer[self.counter] = transition

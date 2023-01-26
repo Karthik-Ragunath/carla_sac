@@ -191,3 +191,6 @@ class CarlaEnv(object):
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN STEP")
         return (numpy_rgb_image, bounded_image), reward, die, _, _
+    
+    def render(self, *arg):
+        self.env.render()
