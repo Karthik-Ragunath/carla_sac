@@ -15,8 +15,9 @@ class Env(object):
     """
     Environment wrapper for CarRacing 
     """
-    def __init__(self, args, env_params, train_context_name):
+    def __init__(self, args, env_params, train_context_name, device):
         self.args = args
+        self.device = device
         if env_params.get('code_mode', 'train') == 'test':
             self.is_inference = True
         else:
@@ -25,6 +26,7 @@ class Env(object):
             env_name='carla-v0', 
             params=env_params, 
             context=train_context_name, 
+            device=self.device,
             save_episode=self.is_inference
         )
         self.obs_dim = self.env.env.observation_space.shape[0]
@@ -92,7 +94,7 @@ class Env(object):
         return memory
 
 class CarlaEnv(object):
-    def __init__(self, env_name, params, context, save_episode=False):
+    def __init__(self, env_name, params, context, device, save_episode):
         class ActionSpace(object):
             def __init__(self,
                          action_space=None,
@@ -118,6 +120,8 @@ class CarlaEnv(object):
         self.episode_num = -1
         self.eval_episode_num = 0
         self.vis_dir = context + '_visualization'
+        self.device = device
+        self.faster_rcnn_obj = DetectBoundingBox(device=self.device)
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -139,8 +143,7 @@ class CarlaEnv(object):
         numpy_rgb_image = None
         if current_image:
             numpy_rgb_image = self.to_rgb_array(current_image)
-            faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
-            bounded_image = faster_rcnn_obj.detect_bounding_boxes()
+            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(current_image.frame) + '.png')
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
@@ -189,8 +192,7 @@ class CarlaEnv(object):
         numpy_rgb_image = None
         if current_image:
             numpy_rgb_image = self.to_rgb_array(current_image)
-            faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
-            bounded_image = faster_rcnn_obj.detect_bounding_boxes()
+            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(current_image.frame) + '.png')
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)

@@ -36,7 +36,7 @@ LOGGER.addHandler(handler)
 if __name__ == "__main__":
     agent = Agent(device=device, args=args)
     agent.load_param(file_dir_path="param")
-    env = Env(args=args, env_params=EnvConfig['test_env_params'], train_context_name=EnvConfig['train_context'])
+    env = Env(args=args, env_params=EnvConfig['test_env_params'], train_context_name=EnvConfig['train_context'], device=device)
 
     training_records = []
     running_score = 0
