@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import os
 # from skimage.transform import resize
 import logging
-
 # Necessary to create custom gym environments
 import gym_carla
 
@@ -18,7 +17,16 @@ class Env(object):
     """
     def __init__(self, args, env_params, train_context_name):
         self.args = args
-        self.env = CarlaEnv(env_name='carla-v0', params=env_params, context=train_context_name)
+        if env_params.get('code_mode', 'train') == 'test':
+            self.is_inference = True
+        else:
+            self.is_inference = False
+        self.env = CarlaEnv(
+            env_name='carla-v0', 
+            params=env_params, 
+            context=train_context_name, 
+            save_episode=self.is_inference
+        )
         self.obs_dim = self.env.env.observation_space.shape[0]
         self.action_dim = self.env.env.action_space.shape[0]
 
@@ -84,7 +92,7 @@ class Env(object):
         return memory
 
 class CarlaEnv(object):
-    def __init__(self, env_name, params, context):
+    def __init__(self, env_name, params, context, save_episode=False):
         class ActionSpace(object):
             def __init__(self,
                          action_space=None,
@@ -106,11 +114,10 @@ class CarlaEnv(object):
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
             self.env.action_space.high, self.env.action_space.shape)
-        self.save_episode = False
+        self.save_episode = save_episode
         self.episode_num = -1
         self.eval_episode_num = 0
-        self.train_vis_dir = context + '_train'
-        self.valid_vis_dir = context + '_valid'
+        self.vis_dir = context + '_visualization'
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -137,7 +144,11 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
+                save_dir = os.path.join(os.getcwd(), self.vis_dir)
+                os.makedirs(save_dir, exist_ok=True)
+                plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
+                # TODO: Check if episode_num is needed.
+                # plt.savefig(os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")
@@ -171,7 +182,7 @@ class CarlaEnv(object):
         return (action_out, numpy_rgb_image, bounded_image)
     '''
 
-    def step(self, action, is_validation=False):
+    def step(self, action):
         mapped_action = np.clip(action, self.action_space.low, self.action_space.high)
         current_image, reward, die, _, _ = self.env.step(mapped_action)
         bounded_image = None
@@ -180,13 +191,14 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            if self.save_episode or is_validation:
+            if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                if is_validation:
-                    plt.savefig(os.path.join(os.getcwd(), self.valid_vis_dir, str(self.eval_episode_num), (str(current_image.frame) + '.png')))
-                else:
-                    plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
+                save_dir = os.path.join(os.getcwd(), self.vis_dir)
+                os.makedirs(save_dir, exist_ok=True)
+                plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
+                # TODO: Check if episode_num is needed.
+                # plt.savefig(os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN STEP")

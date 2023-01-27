@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 import argparse
 
 # set the computation device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# TODO: Remove Hard-Coding
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
 # load the model and the trained weights
 model = create_model(num_classes=5).to(device)

@@ -17,6 +17,7 @@ parser.add_argument('--seed', type=int, default=0, metavar='N', help='random see
 parser.add_argument('--render', action='store_true', help='render the environment')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
+parser.add_argument("--num_episodes", type=int, default=1, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -39,7 +40,7 @@ if __name__ == "__main__":
 
     training_records = []
     running_score = 0
-    for i_ep in range(10):
+    for i_ep in range(args.num_episodes):
         score = 0
         state = env.reset()
 
