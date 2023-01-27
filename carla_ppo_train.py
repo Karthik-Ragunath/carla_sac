@@ -21,6 +21,7 @@ parser.add_argument(
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
 parser.add_argument("--checkpoints_save_dir", type=str, default="param", required=False)
+parser.add_argument("--running_score", type=int, default=2000, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -89,6 +90,6 @@ if __name__ == '__main__':
             print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
             agent.save_param()
         # TODO: Removing hard-coding reward threshild
-        if running_score > 2000:
+        if running_score > args.running_score:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
             break
