@@ -264,7 +264,7 @@ class CarlaEnv(gym.Env):
 
                 # Reset action of last time step
                 # TODO:[another kind of action]
-                self.last_action = np.array([0.0, 0.0])
+                self.last_action = np.array([0.0, 0.0, 0.0])
 
                 # End State variable initialized
                 self.isCollided = False
@@ -546,12 +546,12 @@ class CarlaEnv(gym.Env):
             return reward
 
         current_location = self.ego.get_transform().location
-        distance_travelled_from_origin = abs(self.start_location.distance(current_location))
-        current_velocity = self.ego.get_velocity()
+        distance_travelled_from_origin = abs(self.start_location.distance(current_location)) # meters
+        current_velocity = self.ego.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
         r_step = 10
-        reward = (1000 * (distance_travelled_from_origin - self.previous_distance_travelled) / 1000) - abs(10 - curr_velocity_norm) + r_step
+        reward = ((distance_travelled_from_origin - self.previous_distance_travelled) * 10) - abs(10 - curr_velocity_norm) + r_step
         self.previous_distance_travelled = distance_travelled_from_origin
         
         return reward

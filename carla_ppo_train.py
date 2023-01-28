@@ -89,7 +89,6 @@ if __name__ == '__main__':
                 draw_reward(xdata=i_ep, ydata=running_score)
             print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
             agent.save_param()
-        # TODO: Removing hard-coding reward threshild
         if running_score > args.running_score:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
             break
