@@ -47,7 +47,6 @@ if __name__ == '__main__':
 
     training_records = []
     running_score = 0
-    state = env.reset()
     best_episode_reward = 0
     best_episode_running_score = 0
     LOGGER.info("start training")
