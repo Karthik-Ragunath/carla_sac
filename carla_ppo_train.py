@@ -21,7 +21,7 @@ parser.add_argument(
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
 parser.add_argument("--checkpoints_save_dir", type=str, default="param", required=False)
-parser.add_argument("--running_score", type=int, default=2000, required=False)
+parser.add_argument("--running_score", type=int, default=12000, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         os.makedirs(args.checkpoints_save_dir)
     for i_ep in range(200000):
         score = 0
-        state = env.reset()
+        state = env.reset(episode_num=i_ep)
 
         for t in range(1000):
             action, a_logp = agent.select_action(state)

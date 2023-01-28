@@ -42,7 +42,7 @@ if __name__ == "__main__":
     running_score = 0
     for i_ep in range(args.num_episodes):
         score = 0
-        state = env.reset()
+        state = env.reset(episode_num=i_ep)
 
         for t in range(1000):
             action = agent.select_action(state)

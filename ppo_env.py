@@ -32,7 +32,13 @@ class Env(object):
         self.obs_dim = self.env.env.observation_space.shape[0]
         self.action_dim = self.env.env.action_space.shape[0]
 
-    def reset(self):
+    def reset(self, episode_num: int):
+        if episode_num % 100 == 0:
+            self.env.save_episode = True
+            self.env.episode_num = episode_num
+        else:
+            self.env.save_episode = False
+            self.env.episode_num = episode_num
         self.counter = 0
         self.av_r = self.reward_memory()
 
@@ -147,7 +153,7 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                save_dir = os.path.join(os.getcwd(), self.vis_dir)
+                save_dir = os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num))
                 os.makedirs(save_dir, exist_ok=True)
                 plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
                 # TODO: Check if episode_num is needed.
@@ -196,11 +202,9 @@ class CarlaEnv(object):
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
-                save_dir = os.path.join(os.getcwd(), self.vis_dir)
+                save_dir = os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num))
                 os.makedirs(save_dir, exist_ok=True)
                 plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
-                # TODO: Check if episode_num is needed.
-                # plt.savefig(os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN STEP")
