@@ -4,8 +4,6 @@ import torch
 import glob as glob
 import sys
 import os
-# sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base')
-# sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA')
 sys.path.append(os.path.join(os.getcwd(), 'torch_base'))
 sys.path.append(os.getcwd())
 from faster_rcnn_model import create_model
