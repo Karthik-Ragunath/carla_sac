@@ -21,7 +21,9 @@
                 "--log_seed",
                 "18",
                 "--context",
-                "inference_1"
+                "inference_1",
+                "--num_steps_per_episode",
+                "200"
             ]
         },
         {
@@ -43,7 +45,9 @@
                 "--running_score",
                 "15000",
                 "--context",
-                "train_1"
+                "train_1",
+                "--num_steps_per_episode",
+                "200"
             ]
         },
         {

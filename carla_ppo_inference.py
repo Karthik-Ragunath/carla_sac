@@ -19,6 +19,7 @@ parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
 parser.add_argument("--num_episodes", type=int, default=1, required=False)
 parser.add_argument("--context", type=str, default='inference', required=False)
+parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -45,7 +46,7 @@ if __name__ == "__main__":
         score = 0
         state = env.reset(episode_num=i_ep)
 
-        for t in range(1000):
+        for t in range(args.num_steps_per_episode):
             action = agent.select_action(state)
             state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
