@@ -19,7 +19,9 @@
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "12"
+                "18",
+                "--context",
+                "inference_1"
             ]
         },
         {
@@ -32,14 +34,16 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--render",
-                // "--device_id",
-                // "1",
-                "--img-stack",
-                "21",
-                "--log_seed",
+                "--device_id",
                 "1",
-                "--checkpoints_save_dir",
-                "param_1"
+                "--img-stack",
+                "20",
+                "--log_seed",
+                "19",
+                "--running_score",
+                "15000",
+                "--context",
+                "train_1"
             ]
         },
         {

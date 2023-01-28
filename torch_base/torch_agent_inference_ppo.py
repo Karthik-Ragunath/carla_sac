@@ -14,10 +14,11 @@ class Agent():
     """
     Agent for testing
     """
-    def __init__(self, device, args):
+    def __init__(self, device, context, args):
         self.args = args
         self.device = device
         self.net = Net(self.args.img_stack).float().to(self.device)
+        self.context = context
 
     def select_action(self, state):
         state = torch.from_numpy(state).float().to(self.device).unsqueeze(0)

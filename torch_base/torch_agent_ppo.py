@@ -19,7 +19,7 @@ class Agent():
     ppo_epoch = 10
     buffer_capacity, batch_size = 2000, 128
 
-    def __init__(self, device, args):
+    def __init__(self, device, context, args):
         self.args = args
         self.device = device
         self.transition_type = np.dtype(
@@ -36,6 +36,8 @@ class Agent():
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition_type)
         self.counter = 0
         self.optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
+        self.context = context
+        self.checkpoints_save_dir =  'params_' + self.context
 
     def load_model(self, env_params: dict, file_dir_path: str) -> Tuple[str, int]:
         if env_params.get('load_recent_model', False):
@@ -69,13 +71,13 @@ class Agent():
         return action, a_logp
 
     def save_param(self):
-        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, 'ppo_net_params_model_trained.pkl'))
+        torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, 'ppo_net_params_model_trained.pkl'))
     
     def save_checkpoint_reward(self, episode):
-        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, f"reward_checkpoint_{episode}.pkl"))
+        torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, f"reward_checkpoint_{episode}.pkl"))
 
     def save_checkpoint_running_score(self, episode):
-        torch.save(self.net.state_dict(), os.path.join(self.args.checkpoints_save_dir, f"run_score_checkpoint_{episode}.pkl"))
+        torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, f"run_score_checkpoint_{episode}.pkl"))
 
     def store(self, transition):
         self.buffer[self.counter] = transition

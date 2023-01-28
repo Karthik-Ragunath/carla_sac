@@ -73,8 +73,5 @@ EnvConfig = {
     'eval_env_params': eval_env_params,
 
     # env config for evaluate.py
-    'test_env_params': test_env_params,
-
-    # training context
-    'train_context': "inference_ppo"
+    'test_env_params': test_env_params
 }

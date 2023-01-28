@@ -20,8 +20,9 @@ parser.add_argument(
     '--log-interval', type=int, default=10, metavar='N', help='interval between training status logs (default: 10)')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
-parser.add_argument("--checkpoints_save_dir", type=str, default="param", required=False)
 parser.add_argument("--running_score", type=int, default=12000, required=False)
+parser.add_argument("--context", type=str, default='train', required=False)
+parser.add_argument("--num_episodes", type=int, default=100000, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -39,8 +40,8 @@ LOGGER.addHandler(handler)
 
 if __name__ == '__main__':
     writer = SummaryWriter()
-    agent = Agent(device=device, args=args)
-    env = Env(args=args, env_params=EnvConfig['train_env_params'], train_context_name=EnvConfig['train_context'], device=device)
+    agent = Agent(device=device, context=args.context, args=args)
+    env = Env(args=args, env_params=EnvConfig['train_env_params'], context=args.context, device=device)
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
 
@@ -50,10 +51,10 @@ if __name__ == '__main__':
     best_episode_reward = 0
     best_episode_running_score = 0
     LOGGER.info("start training")
-    # Remove hardcoding directory where models are stored.
-    if not os.path.exists(args.checkpoints_save_dir):
-        os.makedirs(args.checkpoints_save_dir)
-    for i_ep in range(200000):
+    checkpoints_save_dir = 'params_' + args.context
+    if not os.path.exists(checkpoints_save_dir):
+        os.makedirs(checkpoints_save_dir)
+    for i_ep in range(args.num_episodes):
         score = 0
         state = env.reset(episode_num=i_ep)
 

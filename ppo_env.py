@@ -15,7 +15,7 @@ class Env(object):
     """
     Environment wrapper for CarRacing 
     """
-    def __init__(self, args, env_params, train_context_name, device):
+    def __init__(self, args, env_params, context, device):
         self.args = args
         self.device = device
         if env_params.get('code_mode', 'train') == 'test':
@@ -25,7 +25,7 @@ class Env(object):
         self.env = CarlaEnv(
             env_name='carla-v0', 
             params=env_params, 
-            context=train_context_name, 
+            context=context, 
             device=self.device,
             save_episode=self.is_inference
         )
@@ -125,7 +125,7 @@ class CarlaEnv(object):
         self.save_episode = save_episode
         self.episode_num = -1
         self.eval_episode_num = 0
-        self.vis_dir = context + '_visualization'
+        self.vis_dir = 'visualization_' + context
         self.device = device
         self.faster_rcnn_obj = DetectBoundingBox(device=self.device)
 
@@ -156,8 +156,6 @@ class CarlaEnv(object):
                 save_dir = os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num))
                 os.makedirs(save_dir, exist_ok=True)
                 plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
-                # TODO: Check if episode_num is needed.
-                # plt.savefig(os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")

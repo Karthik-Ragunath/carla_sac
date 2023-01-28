@@ -18,6 +18,7 @@ parser.add_argument('--render', action='store_true', help='render the environmen
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
 parser.add_argument("--log_seed", type=int, default=0, required=False)
 parser.add_argument("--num_episodes", type=int, default=1, required=False)
+parser.add_argument("--context", type=str, default='inference', required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -34,9 +35,9 @@ handler.setFormatter(formatter)
 LOGGER.addHandler(handler)
 
 if __name__ == "__main__":
-    agent = Agent(device=device, args=args)
+    agent = Agent(device=device, context=args.context, args=args)
     agent.load_param(file_dir_path="param")
-    env = Env(args=args, env_params=EnvConfig['test_env_params'], train_context_name=EnvConfig['train_context'], device=device)
+    env = Env(args=args, env_params=EnvConfig['test_env_params'], context=args.context, device=device)
 
     training_records = []
     running_score = 0
