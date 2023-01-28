@@ -16,16 +16,11 @@ import argparse
 # set the computation device
 # TODO: Remove Hard-Coding
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-# device = "cpu"
-# load the model and the trained weights
 model = create_model(num_classes=5).to(device)
 print("1" * 50)
 model.load_state_dict(torch.load(
     os.path.join(os.getcwd(), 'torch_base/pretrained_model/model10.pth'), map_location=device
 ))
-# model.load_state_dict(torch.load(
-#     '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base/pretrained_model/model10.pth', map_location=device
-# ))
 model.eval()
 '''
 
@@ -46,15 +41,10 @@ class DetectBoundingBox:
     def __init__(self, device):
         # set the computation device
         self.device = device
-        # device = "cpu"
-        # load the model and the trained weights
         self.model = create_model(num_classes=5).to(self.device)
         self.model.load_state_dict(torch.load(
             os.path.join(os.getcwd(), 'torch_base/pretrained_model/model10.pth'), map_location=self.device
         ))
-        # model.load_state_dict(torch.load(
-        #     '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base/pretrained_model/model10.pth', map_location=device
-        # ))
         self.model.eval()
         self.image = None
         self.image_name = None
@@ -77,11 +67,11 @@ class DetectBoundingBox:
         # convert to tensor
         # image = torch.tensor(image, dtype=torch.float).cuda()
         image = torch.tensor(image, dtype=torch.float)
-        image = image.to(device)
+        image = image.to(self.device)
         # add batch dimension
         image = torch.unsqueeze(image, 0)
         with torch.no_grad():
-            outputs = model(image)
+            outputs = self.model(image)
 
         # load all detection to CPU for further operations
         outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
