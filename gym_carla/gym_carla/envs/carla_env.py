@@ -354,7 +354,7 @@ class CarlaEnv(gym.Env):
     def step(self, action):
         try:
             current_action = np.array(action)
-            throttle, brake, steer = current_action
+            steer, throttle, brake = current_action
             throttle = np.clip(throttle, 0, 1)
             brake = np.clip(brake, 0, 1)
             steer = np.clip(steer, -1, 1)
