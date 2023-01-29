@@ -355,9 +355,9 @@ class CarlaEnv(gym.Env):
         try:
             current_action = np.array(action)
             steer, throttle, brake = current_action
+            steer = np.clip(steer, -1, 1)
             throttle = np.clip(throttle, 0, 1)
             brake = np.clip(brake, 0, 1)
-            steer = np.clip(steer, -1, 1)
 
             # Apply control
             act = carla.VehicleControl(
