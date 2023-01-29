@@ -103,6 +103,13 @@ class CarlaEnv(gym.Env):
 
         # store current image
         self.current_image = None
+        # self.low_speed_timer = 0
+        # self.max_distance    = 3.0  # Max distance from center before terminating
+        # self.target_speed    = 20.0 # kmh
+        # self.reward_functions = {}
+        # self.reward_functions["reward_kendall"] = self.create_reward_fn(self.reward_kendall)
+        # self.reward_functions["reward_speed_centering_angle_add"] = self.create_reward_fn(self.reward_speed_centering_angle_add)
+        # self.reward_functions["reward_speed_centering_angle_multiply"] = self.create_reward_fn(self.reward_speed_centering_angle_multiply)
 
     def compute_side_walk_opp_lane_infractions(self, bounding_box_coordinates):
         in_road_percentage = 0
@@ -545,6 +552,7 @@ class CarlaEnv(gym.Env):
             reward = -500
             return reward
 
+        '''
         current_location = self.ego.get_transform().location
         distance_travelled_from_origin = abs(self.start_location.distance(current_location)) # meters
         current_velocity = self.ego.get_velocity() # m/s
@@ -553,6 +561,12 @@ class CarlaEnv(gym.Env):
         r_step = 5
         reward = ((distance_travelled_from_origin - self.previous_distance_travelled) * 10) - abs(10 - curr_velocity_norm) + r_step
         self.previous_distance_travelled = distance_travelled_from_origin
+        '''
+
+        current_velocity = self.ego.get_velocity() # m/s
+        curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
+        curr_velocity_norm = np.linalg.norm(curr_velocity_array)
+        reward = 3.6 * curr_velocity_norm
         
         return reward
 
@@ -631,3 +645,153 @@ class CarlaEnv(gym.Env):
             transform.location.z = start[2]
 
         return transform
+    
+    def vector(self, v):
+        """ Turn carla Location/Vector3D/Rotation to np.array """
+        if isinstance(v, carla.Location) or isinstance(v, carla.Vector3D):
+            return np.array([v.x, v.y, v.z])
+        elif isinstance(v, carla.Rotation):
+            return np.array([v.pitch, v.yaw, v.roll])
+        
+    def angle_diff(self, v0, v1):
+        """ Calculates the signed angle difference (-pi, pi] between 2D vector v0 and v1 """
+        angle = np.arctan2(v1[1], v1[0]) - np.arctan2(v0[1], v0[0])
+        if angle > np.pi: angle -= 2 * np.pi
+        elif angle <= -np.pi: angle += 2 * np.pi
+        return angle
+    
+
+    def create_reward_fn(self, reward_fn, max_speed=-1):
+        """
+            Wraps input reward function in a function that adds the
+            custom termination logic used in these experiments
+            reward_fn (function(CarlaEnv)):
+                A function that calculates the agent's reward given
+                the current state of the environment. 
+            max_speed:
+                Optional termination criteria that will terminate the
+                agent when it surpasses this speed.
+                (If training with reward_kendal, set this to 20)
+        """
+        def func(env):
+            terminal_reason = "Running..."
+
+            # Stop if speed is less than 1.0 km/h after the first 5s of an episode
+            global low_speed_timer
+            low_speed_timer += 1.0 / env.fps
+            speed = env.vehicle.get_speed()
+            speed_kmh = speed * 3.6
+            if low_speed_timer > 5.0 and speed < 1.0 / 3.6:
+                env.terminal_state = True
+                terminal_reason = "Vehicle stopped"
+
+            # Stop if distance from center > max distance
+            if env.distance_from_center > self.max_distance:
+                env.terminal_state = True
+                terminal_reason = "Off-track"
+
+            # Stop if speed is too high
+            if max_speed > 0 and speed_kmh > max_speed:
+                env.terminal_state = True
+                terminal_reason = "Too fast"
+
+            # Calculate reward
+            reward = 0
+            if not env.terminal_state:
+                reward += reward_fn(env)
+            else:
+                low_speed_timer = 0.0
+                reward -= 10
+
+            if env.terminal_state:
+                env.extra_info.extend([
+                    terminal_reason,
+                    ""
+                ])
+            return reward
+        return func
+
+    #---------------------------------------------------
+    # Create reward functions dict
+    #---------------------------------------------------
+
+    # Kenall's (Learn to Drive in a Day) reward function
+    def reward_kendall(self, env):
+        speed_kmh = 3.6 * env.vehicle.get_speed()
+        return speed_kmh
+
+
+    # Our reward function (additive)
+    def reward_speed_centering_angle_add(self, env):
+        """
+            reward = Positive speed reward for being close to target speed,
+                    however, quick decline in reward beyond target speed
+                + centering factor (1 when centered, 0 when not)
+                + angle factor (1 when aligned with the road, 0 when more than 20 degress off)
+        """
+
+        min_speed = 15.0 # km/h
+        max_speed = 25.0 # km/h
+
+        # Get angle difference between closest waypoint and vehicle forward vector
+        fwd    = self.vector(env.vehicle.get_velocity())
+        wp_fwd = self.vector(env.current_waypoint.transform.rotation.get_forward_vector())
+        angle  = self.angle_diff(fwd, wp_fwd)
+
+        speed_kmh = 3.6 * env.vehicle.get_speed()
+        if speed_kmh < min_speed:                     # When speed is in [0, min_speed] range
+            speed_reward = speed_kmh / min_speed      # Linearly interpolate [0, 1] over [0, min_speed]
+        elif speed_kmh > self.target_speed:                # When speed is in [target_speed, inf]
+                                                    # Interpolate from [1, 0, -inf] over [target_speed, max_speed, inf]
+            speed_reward = 1.0 - (speed_kmh-self.target_speed) / (max_speed-self.target_speed)
+        else:                                         # Otherwise
+            speed_reward = 1.0                        # Return 1 for speeds in range [min_speed, target_speed]
+
+        # Interpolated from 1 when centered to 0 when 3 m from center
+        centering_factor = max(1.0 - env.distance_from_center / self.max_distance, 0.0)
+
+        # Interpolated from 1 when aligned with the road to 0 when +/- 20 degress of road
+        angle_factor = max(1.0 - abs(angle / np.deg2rad(20)), 0.0)
+
+        # Final reward
+        reward = speed_reward + centering_factor + angle_factor
+
+        return reward
+
+    # Our reward function (multiplicative)
+    def reward_speed_centering_angle_multiply(self, env):
+        """
+            reward = Positive speed reward for being close to target speed,
+                    however, quick decline in reward beyond target speed
+                * centering factor (1 when centered, 0 when not)
+                * angle factor (1 when aligned with the road, 0 when more than 20 degress off)
+        """
+
+        min_speed = 15.0 # km/h
+        max_speed = 25.0 # km/h
+
+        # Get angle difference between closest waypoint and vehicle forward vector
+        fwd    = self.vector(env.vehicle.get_velocity())
+        wp_fwd = self.vector(env.current_waypoint.transform.rotation.get_forward_vector())
+        angle  = self.angle_diff(fwd, wp_fwd)
+
+        speed_kmh = 3.6 * env.vehicle.get_speed()
+        if speed_kmh < min_speed:                     # When speed is in [0, min_speed] range
+            speed_reward = speed_kmh / min_speed      # Linearly interpolate [0, 1] over [0, min_speed]
+        elif speed_kmh > self.target_speed:                # When speed is in [target_speed, inf]
+                                                    # Interpolate from [1, 0, -inf] over [target_speed, max_speed, inf]
+            speed_reward = 1.0 - (speed_kmh-self.target_speed) / (max_speed-self.target_speed)
+        else:                                         # Otherwise
+            speed_reward = 1.0                        # Return 1 for speeds in range [min_speed, target_speed]
+
+        # Interpolated from 1 when centered to 0 when 3 m from center
+        centering_factor = max(1.0 - env.distance_from_center / self.max_distance, 0.0)
+
+        # Interpolated from 1 when aligned with the road to 0 when +/- 20 degress of road
+        angle_factor = max(1.0 - abs(angle / np.deg2rad(20)), 0.0)
+
+        # Final reward
+        reward = speed_reward * centering_factor * angle_factor
+
+        return reward
+    
