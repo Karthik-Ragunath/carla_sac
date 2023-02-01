@@ -40,7 +40,7 @@ train_code_mode = 'train'
 train_envs_params = deepcopy(params)
 train_envs_params['port'] = train_env_port
 train_envs_params['code_mode'] = train_code_mode
-train_envs_params['load_recent_model'] = False
+train_envs_params['load_recent_model'] = True
 train_envs_params['image_dimensions'] = (96, 96)
 
 # evaluate env params
@@ -50,7 +50,7 @@ temp_params = deepcopy(params)
 temp_params['port'] = eval_port
 temp_params['code_mode'] = eval_code_mode
 eval_env_params = temp_params
-eval_env_params['load_recent_model'] = False
+eval_env_params['load_recent_model'] = True
 eval_env_params['image_dimensions'] = (96, 96)
 
 # test env params
@@ -60,7 +60,7 @@ temp_params = deepcopy(params)
 temp_params['port'] = test_port
 temp_params['code_mode'] = test_code_mode
 test_env_params = temp_params
-test_env_params['load_recent_model'] = False
+test_env_params['load_recent_model'] = True
 test_env_params['image_dimensions'] = (96, 96)
 
 EnvConfig = {

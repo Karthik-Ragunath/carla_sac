@@ -41,8 +41,8 @@ LOGGER.addHandler(handler)
 
 if __name__ == '__main__':
     writer = SummaryWriter()
-    agent = Agent(device=device, context=args.context, args=args)
     env = Env(args=args, env_params=EnvConfig['train_env_params'], context=args.context, device=device)
+    agent = Agent(device=device, env_params=EnvConfig['train_env_params'], context=args.context, args=args)
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
 

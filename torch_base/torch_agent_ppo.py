@@ -19,8 +19,9 @@ class Agent():
     ppo_epoch = 10
     buffer_capacity, batch_size = 2000, 128
 
-    def __init__(self, device, context, args):
+    def __init__(self, env_params, device, context, args):
         self.args = args
+        self.env_params = env_params
         self.device = device
         self.transition_type = np.dtype(
             [
@@ -39,24 +40,23 @@ class Agent():
         self.context = context
         self.checkpoints_save_dir =  'params_' + self.context
 
-    def load_model(self, env_params: dict, file_dir_path: str) -> Tuple[str, int]:
-        if env_params.get('load_recent_model', False):
-            # set the computation device
-            filenames = glob.glob(os.path.join(file_dir_path, "*.pkl"))
+    def load_param(self) -> None:
+        if self.env_params.get('load_recent_model', False):
+            filenames = glob.glob(os.path.join(self.checkpoints_save_dir, "run_score_checkpoint_*.pkl"))
             model_filename = None
             max_train_epoch = 0
             for filename in filenames:
+                complete_path = filename 
                 filename = Path(filename).stem
                 epoch_num = int(filename.split('_')[-1])
                 if epoch_num > max_train_epoch:
                     max_train_epoch = epoch_num
-                    model_filename = filename
+                    model_filename = complete_path
                     pretrained_steps = max_train_epoch
             if model_filename:
                 self.net.load_state_dict(torch.load(
                     os.path.join(os.getcwd(), model_filename), map_location=self.device
                 ))
-        pass
 
     def select_action(self, state):
         state = torch.from_numpy(state).double().to(self.device).unsqueeze(0)
