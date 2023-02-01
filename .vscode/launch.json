@@ -23,7 +23,7 @@
                 "--context",
                 "inference_1",
                 "--num_steps_per_episode",
-                "200"
+                "150"
             ]
         },
         {
@@ -41,13 +41,13 @@
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "20",
+                "3",
                 "--running_score",
                 "15000",
                 "--context",
-                "train_2",
+                "train_3",
                 "--num_steps_per_episode",
-                "200"
+                "150"
             ]
         },
         {
