@@ -43,9 +43,9 @@ if __name__ == '__main__':
     writer = SummaryWriter()
     env = Env(args=args, env_params=EnvConfig['train_env_params'], context=args.context, device=device)
     agent = Agent(device=device, env_params=EnvConfig['train_env_params'], context=args.context, args=args)
+    pretrained_epoch = agent.load_param()
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
-
     training_records = []
     running_score = 0
     best_episode_reward = 0
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     checkpoints_save_dir = 'params_' + args.context
     if not os.path.exists(checkpoints_save_dir):
         os.makedirs(checkpoints_save_dir)
-    for i_ep in range(args.num_episodes):
+    for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         state = env.reset(episode_num=i_ep)
 

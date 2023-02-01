@@ -40,11 +40,11 @@ class Agent():
         self.context = context
         self.checkpoints_save_dir =  'params_' + self.context
 
-    def load_param(self) -> None:
+    def load_param(self) -> int:
+        max_train_epoch = -1
         if self.env_params.get('load_recent_model', False):
             filenames = glob.glob(os.path.join(self.checkpoints_save_dir, "run_score_checkpoint_*.pkl"))
             model_filename = None
-            max_train_epoch = 0
             for filename in filenames:
                 complete_path = filename 
                 filename = Path(filename).stem
@@ -57,6 +57,7 @@ class Agent():
                 self.net.load_state_dict(torch.load(
                     os.path.join(os.getcwd(), model_filename), map_location=self.device
                 ))
+        return max_train_epoch
 
     def select_action(self, state):
         state = torch.from_numpy(state).double().to(self.device).unsqueeze(0)
