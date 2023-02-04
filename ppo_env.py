@@ -6,8 +6,9 @@ import os
 # from skimage.transform import resize
 import logging
 # Necessary to create custom gym environments
-from carla_setup.autopilot.environment.carla import CarlaEnvironment
-from carla_setup.autopilot.agent import AutonomousVehicle
+import gym_carla
+from autopilot.environment.carla import CarlaEnvironment
+from autopilot.agent import AutonomousVehicle
 
 LOGGER = logging.getLogger(__name__)
 
