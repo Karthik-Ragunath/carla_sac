@@ -6,9 +6,7 @@ import os
 # from skimage.transform import resize
 import logging
 # Necessary to create custom gym environments
-import gym_carla
-from autopilot.environment.carla import CarlaEnvironment
-from autopilot.agent import AutonomousVehicle
+import gym_carla_environment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -166,7 +164,6 @@ class CarlaEnv(object):
         return
 
     def reset(self):
-
         # self.msg_queue = Queue()
         # if not self.environment:
             # self.environment = CarlaEnv()
@@ -191,34 +188,6 @@ class CarlaEnv(object):
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
-
-    '''
-    def step(self, action, is_validation=False):
-        assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
-            'the action should be in range [-1.0, 1.0]'
-        # mapped_action = [-2, -2] * ((action + 1) * 2) = action * 2
-        mapped_action = self.action_space.low + (action - (-1.0)) * (
-            (self.action_space.high - self.action_space.low) / 2.0)
-        mapped_action = np.clip(mapped_action, self.action_space.low, self.action_space.high)
-        action_out, current_image = self.env.step(mapped_action)
-        bounded_image = None
-        numpy_rgb_image = None
-        if current_image:
-            numpy_rgb_image = self.to_rgb_array(current_image)
-            faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
-            bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            if self.save_episode or is_validation:
-                fig = plt.figure()
-                plt.imshow(bounded_image)
-                if is_validation:
-                    plt.savefig(os.path.join(os.getcwd(), self.valid_vis_dir, str(self.eval_episode_num), (str(current_image.frame) + '.png')))
-                else:
-                    plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
-                plt.close(fig)
-        else:
-            print("NO IMAGE DETECTED FOR NOW IN STEP")
-        return (action_out, numpy_rgb_image, bounded_image)
-    '''
 
     def reward(self):
         calculate_reward = self.env.all_variables
