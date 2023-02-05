@@ -116,20 +116,18 @@ class CarlaEnv(object):
             def sample(self):
                 return self.action_space.sample()
         
+        self.params = params
         self.env = gym.make(
             'gym_carla_environment-v0',
             params=dict(
                 carla_host='127.0.0.1',
-                carla_port='2000',
+                carla_port=self.params['port'],
                 carla_timeout=30.0,
                 sync=True,
-                tick_interval=0.5
+                tick_interval=self.params['sensor_tick']
             )
         )
-
-        self.env = gym.make(env_name, params=params)
-        self.params = params
-        self._max_episode_steps = int(params['max_time_episode'])
+        self._max_episode_steps = int(self.params['max_time_episode'])
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
             self.env.action_space.high, self.env.action_space.shape)
@@ -164,14 +162,6 @@ class CarlaEnv(object):
         return
 
     def reset(self):
-        # self.msg_queue = Queue()
-        # if not self.environment:
-            # self.environment = CarlaEnv()
-        # else:
-        #     self.environment.close()
-        #     self.environment = CarlaEnv()
-        # self.environment.add_tick_callback(block_msg_queue)
-
         current_image = self.env.reset()
         bounded_image = None
         numpy_rgb_image = None
@@ -189,17 +179,7 @@ class CarlaEnv(object):
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")
         return numpy_rgb_image, bounded_image
 
-    def reward(self):
-        calculate_reward = self.env.all_variables
-        return calculate_reward
-
     def step(self, action):
-        
-        # self.env.vehicle.ApplyControl(brake, speed, steer)
-        # self.msg_queue.put(0) # release the tick
-
-        # self.msg_queue.put((brake, speed, steer))
-
         mapped_action = np.clip(action, self.action_space.low, self.action_space.high)
         current_image, reward, die, _, _ = self.env.step(mapped_action)
         bounded_image = None
