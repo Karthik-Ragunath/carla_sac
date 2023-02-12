@@ -31,7 +31,9 @@ params = {
     # maximum times to spawn ego vehicle
     'max_ego_spawn_times': 100,
     # maximum number of traffic vehicles
-    'max_traffic_vehicles': 1
+    'max_traffic_vehicles': 1,
+    # sensor tick,
+    'sensor_tick': 0.5
 }
 
 # train env params

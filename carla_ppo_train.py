@@ -19,7 +19,7 @@ parser.add_argument('--vis', action='store_true', help='use visdom')
 parser.add_argument(
     '--log-interval', type=int, default=10, metavar='N', help='interval between training status logs (default: 10)')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
-parser.add_argument("--log_seed", type=int, default=0, required=False)
+parser.add_argument("--log_seed", type=str, default="0", required=False)
 parser.add_argument("--running_score", type=int, default=12000, required=False)
 parser.add_argument("--context", type=str, default='train', required=False)
 parser.add_argument("--num_episodes", type=int, default=100000, required=False)

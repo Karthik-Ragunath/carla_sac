@@ -284,6 +284,10 @@ class CarlaEnv(gym.Env):
                 self.distance_travelled = 0
                 self.previous_velocity = self.ego.get_velocity()
 
+                self.steer = None
+                self.brake = None
+                self.throttle = None
+
                 return self.current_image
 
             except Exception as e:
@@ -358,6 +362,10 @@ class CarlaEnv(gym.Env):
             steer = np.clip(steer, -1.0, 1.0)
             throttle = np.clip(throttle, 0.0, 1.0)
             brake = np.clip(brake, 0.0, 1.0)
+
+            self.steer = steer
+            self.throttle = throttle
+            self.brake = brake
 
             # Apply control
             act = carla.VehicleControl(
@@ -562,6 +570,13 @@ class CarlaEnv(gym.Env):
         reward = ((distance_travelled_from_origin - self.previous_distance_travelled) * 10) - abs(10 - curr_velocity_norm) + r_step
         self.previous_distance_travelled = distance_travelled_from_origin
         '''
+        # steering - negative_value = right; positive_value = left
+        if self.steer < 0:
+            right_steer = -(self.steer)
+            left_steer = 0
+        else:
+            right_steer = 0
+            left_steer = self.steer
 
         current_velocity = self.ego.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
