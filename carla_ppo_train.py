@@ -58,7 +58,7 @@ if __name__ == '__main__':
         score = 0
         state = env.reset(episode_num=i_ep)
 
-        for t in range(args.num_steps_per_episode):
+        for step_index in range(args.num_steps_per_episode):
             action, a_logp = agent.select_action(state)
             state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
@@ -84,6 +84,7 @@ if __name__ == '__main__':
 
         writer.add_scalar('train_reward_score', score, i_ep)
         writer.add_scalar('train_reward_running_score', running_score, i_ep)
+        writer.add_scalar('train_steps', step_index, i_ep)
 
         if i_ep % args.log_interval == 0:
             if args.vis:
