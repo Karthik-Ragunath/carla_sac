@@ -581,7 +581,8 @@ class CarlaEnv(gym.Env):
         current_velocity = self.ego.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
-        reward = 3.6 * curr_velocity_norm
+        speed_kmph = 3.6 * curr_velocity_norm
+        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
         return reward
 
     def _make_carla_client(self, host, port):
