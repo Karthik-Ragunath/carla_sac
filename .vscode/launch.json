@@ -54,15 +54,15 @@
             "args": [
                 // "--render",
                 "--device_id",
-                "1",
+                "0",
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "3_1",
+                "4",
                 "--running_score",
                 "15000",
                 "--context",
-                "train_3",
+                "train_4",
                 "--num_steps_per_episode",
                 "150"
             ]
