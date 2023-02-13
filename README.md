@@ -2,7 +2,7 @@
 
 This github repository is aimed at research to perform end-to-end motion planning for Autonomous Driving based on PPO (and SAC) algorithms.
 
-# STEPS
+## STEPS
 
 1. Create a conda environment and activate it
 
