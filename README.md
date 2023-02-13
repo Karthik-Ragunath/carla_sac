@@ -70,3 +70,6 @@ python util_video_visualization.py  --image_dir visualization_inference_3/reward
       --fps 10 --output_dir visualization_videos/reward
 ```
 
+### Example: Inference on model trained for 5 hrs on Zero Traffic Simulation
+
+[!Alt text](https://github.com/Karthik-Ragunath/carla_sac/blob/feature/ppo_carla/assets/visualization_inference_4_0.mp4 "ZeroTraffic - 5 hours Training")
