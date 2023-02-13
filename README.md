@@ -1,80 +1,72 @@
-# RL_CARLA
-## SAC in Carla simulator
-Based on [PARL](https://github.com/PaddlePaddle/PARL) and Torch/Paddle(Baidu deep learning framework), 
-a parallel version of SAC was implemented and achieved high performance in the CARLA environment.
-> Paper: SAC in [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor](https://arxiv.org/abs/1801.01290)
+# CARLA-PPO-Algorithm
 
-### Carla simulator introduction
-Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/tag/0.9.6) to know more about Carla simulator.
+This github repository is aimed at research to perform end-to-end motion planning for Autonomous Driving based on PPO (and SAC) algorithms.
 
-### Benchmark result
-<img src=".benchmark/carla_sac.png" width = "1100" height ="400" alt="carla_sac"/>
-<img src=".benchmark/Lane_bend.gif" width = "300" height ="200" alt="result"/>
+# STEPS
 
-+ Result was evaluated with mode `Lane`
+1. Create a conda environment and activate it
 
-## How to use
-+ System: Ubuntu 16.04
-### Dependencies:
-+ Simulator: [CARLA](https://github.com/carla-simulator/carla/releases/tag/0.9.6)
-+ RL env: gym_carla
-### Installation 
-1. Create conda environment
-    ```env
-    $ conda create -n rl_carla python=3.6
-    $ conda activate rl_carla
-    ```
-2. Download [CARLA_0.9.6](https://github.com/carla-simulator/carla/releases/tag/0.9.6), 
-   extract it to some folder, and add CARLA to `PYTHONPATH` environment variable
-   ```
-   $ export PYTHONPATH="SOMEFOLDER/CARLA_0.9.6/PythonAPI/carla/dist/carla-0.9.6-py3.5-linux-x86_64.egg:$PYTHONPATH"
-   ```
-3. Clone repository from [this repo](https://github.com/ShuaibinLi/RL_CARLA.git)
-    ```clone
-    $ git clone https://github.com/ShuaibinLi/RL_CARLA.git
-    ```
-4. Install the packages
-    ```
-    ## install requirements，
-    ## Install paddle or torch wrt which base you are using(paddle or torch)
-    ## Make sure only one deep-learning framework exists in your conda_env during traing
-    $ pip install -r requirements.txt
-    
-    ## install gym env of carla
-    $ cd gym_carla
-    $ pip install -e .
-    ```
-   or you can install the package that you need by `pip/conda install [package name]`
+```
+conda create -n carla_ppo python=3.8
+conda activate carla_ppo
+```
 
-#### Start Training
-1. Open another(new) terminal, enter the CARLA root folder and launch CARLA service. 
-   There are two modes to start the CARLA server: <br>
-   (1) non-display mode
-    ```start env
-    $ DISPLAY= ./CarlaUE4.sh -opengl -carla-port=2021
-    ```
-   (2) display mode
-   ```start_env
-   $ ./CarlaUE4.sh -windowed -carla-port=2021
-   ```
-   + Start three CARLA services (ports: 2021,2023,2025) for data collecting and training, 
-     one service (port: 2027) for evaluating.
-     
-2. For parallel training, we can execute the following [xparl](https://parl.readthedocs.io/en/stable/parallel_training/setup.html) command to start a PARL cluster：
-   ```Parallelization
-   $ xparl start --port 8080
-   ```
-   check xparl cluster status by `xparl status`
+2. Install pytorch
 
-3. Start training
-   ```train
-   $ python train.py --xparl_addr localhost:8080
-   ```
-#### Evaluate trained agent
- Open another(new) terminal, enter the CARLA root folder and launch CARLA service with display mode. 
- ```start_test
- $ ./CarlaUE4.sh -windowed -carla-port=2029
- ```
- Restore saved model to see performance.
- ```
- $ python evaluate.py --restore_model model.ckpt
+```
+conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+```
+
+3. Install other required packages after 
+```
+pip install -r requirements.txt
+```
+
+4. Download CARLA 0.9.13 package and start in port 2021 for training
+Refer - https://carla.readthedocs.io/en/latest/start_quickstart/#carla-0912
+
+5. Setup training and inference configs - Default configs provided in
+```
+env_config.py
+```
+
+6. Start Training
+```
+python  carla_ppo_train.py --device_id <device_id> --img-stack <image_stack_dimension> \
+        --log_seed <log_seed No.> --running_score <max reward to stop training> \
+        --context <train_context_id> --num_steps_per_episode <number of steps per episode>
+```
+
+Example:
+```
+python  carla_ppo_train.py --device_id 0 --img-stack 30 \
+        --log_seed 1 --running_score 30000 \
+        --context train_1 --num_steps_per_episode 150
+```
+
+7. Perform Inference
+```
+python  carla_ppo_inference.py --device_id <device_id> --img-stack <image_stack_dimension> \
+        --log_seed <log_seed No.>  --context <train_context_id> \
+        --num_steps_per_episode <number of steps per episode>
+```
+
+Example
+```
+python  carla_ppo_train.py --device_id 0 --img-stack 30 \
+        --log_seed 1 --context train_1 \
+        --num_steps_per_episode 150
+```
+
+8. Generate Inference Videos
+
+```
+python util_video_visualization.py  --image_dir <image_dir where inference images are stored> \
+      --fps <frames per second> --output_dir <inference video output directory>
+```
+
+```
+python util_video_visualization.py  --image_dir visualization_inference_3/reward \
+      --fps 10 --output_dir visualization_videos/reward
+```
+
