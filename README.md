@@ -72,4 +72,4 @@ python util_video_visualization.py  --image_dir visualization_inference_3/reward
 
 ### Example: Inference on model trained for 5 hrs on Zero Traffic Simulation
 
-[!Alt text](https://github.com/Karthik-Ragunath/carla_sac/blob/feature/ppo_carla/assets/visualization_inference_4_0.mp4 "ZeroTraffic - 5 hours Training")
+https://user-images.githubusercontent.com/16360004/218417562-a81d0147-ff78-47e4-ad02-fd8dd34c2bbe.mp4
