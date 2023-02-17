@@ -392,7 +392,7 @@ class CarlaEnv(gym.Env):
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return self.current_image, current_reward, isDone, False, {}
+            return self.current_image, 0, False, True, {}
 
     def render(self, mode='human'):
         pass

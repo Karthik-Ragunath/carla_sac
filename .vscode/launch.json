@@ -14,11 +14,11 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "--image_dir",
-                "visualization_inference_3/reward",
+                "visualization_inference_4/0",
                 "--fps",
                 "10",
                 "--output_dir",
-                "visualization_videos/reward"
+                "visualization_videos/run_score"
             ]
         },
         {
@@ -32,13 +32,13 @@
             "args": [
                 // "--render",
                 "--device_id",
-                "1",
+                "0",
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "3_1",
+                "4_1",
                 "--context",
-                "inference_3",
+                "inference_4",
                 "--num_steps_per_episode",
                 "150"
             ]
