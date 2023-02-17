@@ -24,6 +24,7 @@ parser.add_argument("--running_score", type=int, default=12000, required=False)
 parser.add_argument("--context", type=str, default='train', required=False)
 parser.add_argument("--num_episodes", type=int, default=100000, required=False)
 parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
+parser.add_argument("--load_context", type=str, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     writer = SummaryWriter()
     env = Env(args=args, env_params=EnvConfig['train_env_params'], context=args.context, device=device)
     agent = Agent(device=device, env_params=EnvConfig['train_env_params'], context=args.context, args=args)
-    pretrained_epoch = agent.load_param()
+    pretrained_epoch = agent.load_param(load_context=args.load_context)
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
     training_records = []
