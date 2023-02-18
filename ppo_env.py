@@ -22,7 +22,7 @@ class Env(object):
         else:
             self.is_inference = False
         self.env = CarlaEnv(
-            env_name='carla_environment-v0', 
+            env_name='gym_carla_environment-v0', 
             params=env_params, 
             context=context, 
             device=self.device,
@@ -118,7 +118,7 @@ class CarlaEnv(object):
         
         self.params = params
         self.env = gym.make(
-            'gym_carla_environment-v0',
+            env_name,
             params=dict(
                 carla_host='127.0.0.1',
                 carla_port=self.params['port'],
