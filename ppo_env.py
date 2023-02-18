@@ -22,7 +22,7 @@ class Env(object):
         else:
             self.is_inference = False
         self.env = CarlaEnv(
-            env_name='gym_carla_environment-v0', 
+            env_name='carla-environment-v0', 
             params=env_params, 
             context=context, 
             device=self.device,
