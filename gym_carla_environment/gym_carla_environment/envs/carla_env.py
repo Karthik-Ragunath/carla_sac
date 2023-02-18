@@ -25,6 +25,7 @@ class CarlaEnv(gym.Env):
             shape=(512,),
             dtype=np.float32
         )
+        self.carla_environment = None
         return
 
     def block_msg_queue(self):
