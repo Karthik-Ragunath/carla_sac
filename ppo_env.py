@@ -152,15 +152,6 @@ class CarlaEnv(object):
         array = array[:, :, ::-1]
         return array
 
-    def block_msg_queue(self):
-        self.msg_queue.get()
-        return
-    
-    def block_msg_queue(self):
-        steer, brake, acceleration = self.msg_queue.get()
-        self.env.vehicle.applyControl(steer, brake, acceleration)
-        return
-
     def reset(self):
         current_image = self.env.reset()
         bounded_image = None
