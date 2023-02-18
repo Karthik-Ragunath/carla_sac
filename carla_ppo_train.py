@@ -19,11 +19,12 @@ parser.add_argument('--vis', action='store_true', help='use visdom')
 parser.add_argument(
     '--log-interval', type=int, default=10, metavar='N', help='interval between training status logs (default: 10)')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
-parser.add_argument("--log_seed", type=int, default=0, required=False)
+parser.add_argument("--log_seed", type=str, default="0", required=False)
 parser.add_argument("--running_score", type=int, default=12000, required=False)
 parser.add_argument("--context", type=str, default='train', required=False)
 parser.add_argument("--num_episodes", type=int, default=100000, required=False)
 parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
+parser.add_argument("--load_context", type=str, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     writer = SummaryWriter()
     env = Env(args=args, env_params=EnvConfig['train_env_params'], context=args.context, device=device)
     agent = Agent(device=device, env_params=EnvConfig['train_env_params'], context=args.context, args=args)
-    pretrained_epoch = agent.load_param()
+    pretrained_epoch = agent.load_param(load_context=args.load_context)
     if args.vis:
         draw_reward = DrawLine(env="car", title="PPO", xlabel="Episode", ylabel="Moving averaged episode reward")
     training_records = []
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         score = 0
         state = env.reset(episode_num=i_ep)
 
-        for t in range(args.num_steps_per_episode):
+        for step_index in range(args.num_steps_per_episode):
             action, a_logp = agent.select_action(state)
             state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
@@ -84,6 +85,7 @@ if __name__ == '__main__':
 
         writer.add_scalar('train_reward_score', score, i_ep)
         writer.add_scalar('train_reward_running_score', running_score, i_ep)
+        writer.add_scalar('train_steps', step_index, i_ep)
 
         if i_ep % args.log_interval == 0:
             if args.vis:

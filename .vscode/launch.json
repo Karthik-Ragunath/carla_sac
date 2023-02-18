@@ -5,6 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "video_viz",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/util_video_visualization.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--image_dir",
+                "visualization_inference_4/0",
+                "--fps",
+                "10",
+                "--output_dir",
+                "visualization_videos/run_score"
+            ]
+        },
+        {
             "name": "ppo_carla_racing_inference",
             "type": "python",
             "request": "launch",
@@ -15,13 +32,13 @@
             "args": [
                 // "--render",
                 "--device_id",
-                "1",
+                "0",
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "18",
+                "4_1",
                 "--context",
-                "inference_1",
+                "inference_4",
                 "--num_steps_per_episode",
                 "150"
             ]
@@ -36,18 +53,13 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--render",
-                "--device_id",
-                "1",
-                "--img-stack",
-                "20",
-                "--log_seed",
-                "3",
-                "--running_score",
-                "15000",
-                "--context",
-                "train_3",
-                "--num_steps_per_episode",
-                "150"
+                "--device_id", "0",
+                "--img-stack", "20",
+                "--log_seed", "5",
+                "--running_score", "15000",
+                "--context", "train_5",
+                "--load_context", "train_4",
+                "--num_steps_per_episode", "150"
             ]
         },
         {

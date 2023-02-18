@@ -284,6 +284,10 @@ class CarlaEnv(gym.Env):
                 self.distance_travelled = 0
                 self.previous_velocity = self.ego.get_velocity()
 
+                self.steer = None
+                self.brake = None
+                self.throttle = None
+
                 return self.current_image
 
             except Exception as e:
@@ -359,6 +363,10 @@ class CarlaEnv(gym.Env):
             throttle = np.clip(throttle, 0.0, 1.0)
             brake = np.clip(brake, 0.0, 1.0)
 
+            self.steer = steer
+            self.throttle = throttle
+            self.brake = brake
+
             # Apply control
             act = carla.VehicleControl(
                 throttle=float(throttle),
@@ -384,7 +392,7 @@ class CarlaEnv(gym.Env):
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return self.current_image, current_reward, isDone, False, {}
+            return self.current_image, 0, False, True, {}
 
     def render(self, mode='human'):
         pass
@@ -562,11 +570,19 @@ class CarlaEnv(gym.Env):
         reward = ((distance_travelled_from_origin - self.previous_distance_travelled) * 10) - abs(10 - curr_velocity_norm) + r_step
         self.previous_distance_travelled = distance_travelled_from_origin
         '''
+        # steering - negative_value = right; positive_value = left
+        if self.steer < 0:
+            right_steer = -(self.steer)
+            left_steer = 0
+        else:
+            right_steer = 0
+            left_steer = self.steer
 
         current_velocity = self.ego.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
-        reward = 3.6 * curr_velocity_norm
+        speed_kmph = 3.6 * curr_velocity_norm
+        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
         return reward
 
     def _make_carla_client(self, host, port):

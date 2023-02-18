@@ -16,7 +16,7 @@ parser.add_argument('--img-stack', type=int, default=4, metavar='N', help='stack
 parser.add_argument('--seed', type=int, default=0, metavar='N', help='random seed (default: 0)')
 parser.add_argument('--render', action='store_true', help='render the environment')
 parser.add_argument("--device_id", "-dev", type=int, default=0, required=False)
-parser.add_argument("--log_seed", type=int, default=0, required=False)
+parser.add_argument("--log_seed", type=str, default=0, required=False)
 parser.add_argument("--num_episodes", type=int, default=1, required=False)
 parser.add_argument("--context", type=str, default='inference', required=False)
 parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
@@ -37,7 +37,8 @@ LOGGER.addHandler(handler)
 
 if __name__ == "__main__":
     agent = Agent(device=device, context=args.context, args=args)
-    agent.load_param(file_dir_path="param")
+    corresponding_train_context = args.context.replace('inference', 'train')
+    agent.load_param(file_dir_path="params_" + corresponding_train_context)
     env = Env(args=args, env_params=EnvConfig['test_env_params'], context=args.context, device=device)
 
     training_records = []
