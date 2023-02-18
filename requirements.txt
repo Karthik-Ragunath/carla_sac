@@ -5,14 +5,14 @@ pygame
 opencv-python
 parl
 matplotlib
-pip install gym[box2d]
+gym[box2d]
 visdom
 carla==0.9.13
 scikit-image
 tensorboard
 # conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
 matplotlib
-transforms3d
+# transforms3d
 #paddlepaddle-gpu
 ##Install paddle or torch wrt which base you are using(paddle or torch)
 #--find-links https://download.pytorch.org/whl/torch_stable.html

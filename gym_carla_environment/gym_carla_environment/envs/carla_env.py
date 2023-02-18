@@ -1,5 +1,6 @@
 import carla
 import gym
+from gym import spaces
 import logging
 import numpy as np
 from queue import Queue
@@ -13,6 +14,17 @@ class CarlaEnv(gym.Env):
     def __init__(self, params):
         LOGGER.info("Init of CarlaEnv instance called.")
         self.params = params
+        self.action_space = spaces.Box(
+            np.array([-1.0, 0.0, 0.0]),
+            np.array([1.0, 1.0, 1.0]),
+            dtype=np.float32
+        )
+        self.observation_space = spaces.Box(
+            low=-50.0,
+            high=50.0,
+            shape=(512,),
+            dtype=np.float32
+        )
         return
 
     def block_msg_queue(self):
