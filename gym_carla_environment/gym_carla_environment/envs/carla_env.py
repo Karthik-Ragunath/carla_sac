@@ -61,7 +61,7 @@ class CarlaEnv(gym.Env):
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle()
             self.environment.add_tick_callback(self.block_msg_queue)
-        current_snapshot = self.carla_environment.frame
+        current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         return current_snapshot
 
     def step(self, action):
@@ -69,7 +69,7 @@ class CarlaEnv(gym.Env):
         try:
             self.msg_queue.put(action)
             self.reward = self.get_reward()
-            return self.carla_environment.frame, self.reward, self.terminated, False, {}
+            return self.agent_vehicle.sensors['front_camera'].fetch(), self.reward, self.terminated, False, {}
         except Exception as e:
             LOGGER.exception(f"exception raised - {e}")
             return None, -500, True, False, {}
