@@ -153,12 +153,14 @@ class CarlaEnv(object):
         return array
 
     def reset(self):
-        current_image = self.env.reset()
+        current_image, aux_dict = self.env.reset()
+        frame_number = aux_dict['frame_number']
         bounded_image = None
         numpy_rgb_image = None
-        if current_image:
-            numpy_rgb_image = self.to_rgb_array(current_image)
-            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(current_image.frame) + '.png')
+        if not current_image is None:
+            # numpy_rgb_image = self.to_rgb_array(current_image)
+            numpy_rgb_image = current_image
+            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(frame_number) + '.png')
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
@@ -172,12 +174,13 @@ class CarlaEnv(object):
 
     def step(self, action):
         mapped_action = np.clip(action, self.action_space.low, self.action_space.high)
-        current_image, reward, die, _, _ = self.env.step(mapped_action)
+        current_image, reward, die, _, aux_dict = self.env.step(mapped_action)
         bounded_image = None
         numpy_rgb_image = None
-        if current_image:
-            numpy_rgb_image = self.to_rgb_array(current_image)
-            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(current_image.frame) + '.png')
+        if not current_image is None:
+            # numpy_rgb_image = self.to_rgb_array(current_image)
+            numpy_rgb_image = current_image
+            bounded_image = self.faster_rcnn_obj.detect_bounding_boxes(numpy_rgb_image, str(aux_dict['frame_number']) + '.png')
             if self.save_episode:
                 fig = plt.figure()
                 plt.imshow(bounded_image)
