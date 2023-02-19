@@ -166,7 +166,7 @@ class CarlaEnv(object):
                 plt.imshow(bounded_image)
                 save_dir = os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num))
                 os.makedirs(save_dir, exist_ok=True)
-                plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
+                plt.savefig(os.path.join(save_dir, (str(frame_number) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN RESET")
@@ -186,7 +186,7 @@ class CarlaEnv(object):
                 plt.imshow(bounded_image)
                 save_dir = os.path.join(os.getcwd(), self.vis_dir, str(self.episode_num))
                 os.makedirs(save_dir, exist_ok=True)
-                plt.savefig(os.path.join(save_dir, (str(current_image.frame) + '.png')))
+                plt.savefig(os.path.join(save_dir, (str(aux_dict['frame_number']) + '.png')))
                 plt.close(fig)
         else:
             LOGGER.error("NO IMAGE DETECTED FOR NOW IN STEP")
