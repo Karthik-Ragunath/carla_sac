@@ -18,7 +18,7 @@
                 "--fps",
                 "10",
                 "--output_dir",
-                "visualization_videos/run_score"
+                "visualization_videos/4/run_score"
             ]
         },
         {
@@ -30,17 +30,11 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "args": [
-                // "--render",
-                "--device_id",
-                "0",
-                "--img-stack",
-                "20",
-                "--log_seed",
-                "4_1",
-                "--context",
-                "inference_4",
-                "--num_steps_per_episode",
-                "150"
+                "--device_id", "0",
+                "--img-stack", "20",
+                "--log_seed", "4_1",
+                "--context", "inference_4",
+                "--num_steps_per_episode", "150"
             ]
         },
         {
