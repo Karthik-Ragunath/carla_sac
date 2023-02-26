@@ -35,7 +35,7 @@ class CarlaEnv(gym.Env):
             steer=float(steer),
             brake=float(brake)
         )
-        self.agent_vehicle.apply_control(vehicle_action)
+        self.agent_vehicle.vehicle.apply_control(vehicle_action)
         return
 
     def reset(self):
@@ -50,6 +50,7 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle()
+            self.carla_environment.add_tick_callback(self.block_msg_queue)
         else:
             self.carla_environment.close()
             self.carla_environment = CarlaEnvironment(
@@ -60,7 +61,7 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle()
-            self.environment.add_tick_callback(self.block_msg_queue)
+            self.carla_environment.add_tick_callback(self.block_msg_queue)
         current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         frame_number = self.carla_environment.frame
         return current_snapshot, {"frame_number": frame_number}

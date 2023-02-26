@@ -33,7 +33,7 @@ params = {
     # maximum number of traffic vehicles
     'max_traffic_vehicles': 1,
     # sensor tick,
-    'sensor_tick': 0.5
+    'sensor_tick': 0.1
 }
 
 # train env params
