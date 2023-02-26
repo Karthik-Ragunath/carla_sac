@@ -49,7 +49,7 @@ class CarlaEnv(gym.Env):
                 sync=self.params['sync'],
                 tick_interval=self.params['tick_interval']            
             )
-            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle()
+            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         else:
             self.carla_environment.close()
@@ -60,7 +60,7 @@ class CarlaEnv(gym.Env):
                 sync=self.params['sync'],
                 tick_interval=self.params['tick_interval']            
             )
-            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle()
+            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         frame_number = self.carla_environment.frame
