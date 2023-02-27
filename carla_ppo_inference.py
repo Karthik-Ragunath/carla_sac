@@ -62,3 +62,5 @@ if __name__ == "__main__":
                 break
 
         LOGGER.info('Ep {}\tScore: {:.2f}\t'.format(i_ep, score))
+    
+    exit(0)
