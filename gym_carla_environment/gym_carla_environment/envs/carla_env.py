@@ -26,6 +26,9 @@ class CarlaEnv(gym.Env):
             dtype=np.float32
         )
         self.carla_environment = None
+        self.steer = None
+        self.throttle = None
+        self.brake = None
         return
 
     def block_msg_queue(self):
@@ -50,6 +53,8 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
+            self.agent_vehicle.autopilot = False
+            self.agent_vehicle.control = None
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         else:
             self.carla_environment.close()
@@ -61,6 +66,8 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
+            self.agent_vehicle.autopilot = False
+            self.agent_vehicle.control = None
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         frame_number = self.carla_environment.frame
@@ -69,6 +76,10 @@ class CarlaEnv(gym.Env):
     def step(self, action):
         """Step function."""
         try:
+            steer, throttle, brake = action
+            self.steer = steer
+            self.throttle = throttle
+            self.brake = brake
             self.msg_queue.put(action)
             self.reward = self.get_reward()
             frame_number = self.carla_environment.frame
@@ -82,10 +93,24 @@ class CarlaEnv(gym.Env):
         self.terminated = self.check_terminal()
         if self.terminated:
             return -500
+        
+        # current_velocity = self.agent_vehicle.get_velocity() # m/s
+        # curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
+        # curr_velocity_norm = np.linalg.norm(curr_velocity_array)
+        # reward = 3.6 * curr_velocity_norm # kmph
+
+        if self.steer < 0:
+            right_steer = -(self.steer)
+            left_steer = 0
+        else:
+            right_steer = 0
+            left_steer = self.steer
+
         current_velocity = self.agent_vehicle.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
-        reward = 3.6 * curr_velocity_norm # kmph
+        speed_kmph = 3.6 * curr_velocity_norm
+        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
         return reward
     
     def check_terminal(self):

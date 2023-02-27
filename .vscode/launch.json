@@ -25,11 +25,11 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "--image_dir",
-                "visualization_inference_4/0",
+                "visualization_inference_5/0",
                 "--fps",
                 "10",
                 "--output_dir",
-                "visualization_videos/run_score"
+                "visualization_videos/run_score_5"
             ]
         },
         {
@@ -47,11 +47,13 @@
                 "--img-stack",
                 "20",
                 "--log_seed",
-                "4_1",
+                "5_1",
                 "--context",
-                "inference_4",
+                "inference_5",
                 "--num_steps_per_episode",
-                "150"
+                "150",
+                "--load_context",
+                "inference_4"
             ]
         },
         {

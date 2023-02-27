@@ -20,6 +20,7 @@ parser.add_argument("--log_seed", type=str, default=0, required=False)
 parser.add_argument("--num_episodes", type=int, default=1, required=False)
 parser.add_argument("--context", type=str, default='inference', required=False)
 parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
+parser.add_argument("--load_context", type=str, required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -37,7 +38,10 @@ LOGGER.addHandler(handler)
 
 if __name__ == "__main__":
     agent = Agent(device=device, context=args.context, args=args)
-    corresponding_train_context = args.context.replace('inference', 'train')
+    if args.load_context:
+        corresponding_train_context = args.load_context.replace('inference', 'train')
+    else:
+        corresponding_train_context = args.context.replace('inference', 'train')
     agent.load_param(file_dir_path="params_" + corresponding_train_context)
     env = Env(args=args, env_params=EnvConfig['test_env_params'], context=args.context, device=device)
 
