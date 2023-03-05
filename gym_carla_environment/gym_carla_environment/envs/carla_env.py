@@ -30,6 +30,9 @@ class CarlaEnv(gym.Env):
         self.steer = None
         self.throttle = None
         self.brake = None
+        self.generate_traffic = params['generate_traffic']
+        self.num_traffic_vehicles = params['num_traffic_vehicles']
+        self.num_pedestrians = params['num_pedestrians']
         return
 
     def block_msg_queue(self):
@@ -54,6 +57,11 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=True)
+            if self.generate_traffic:
+                self.carla_environment.spawn_traffic(
+                    number_of_vehicles=self.num_traffic_vehicles,
+                    number_of_walkers=self.num_pedestrians
+                )
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
@@ -69,6 +77,11 @@ class CarlaEnv(gym.Env):
                 tick_interval=self.params['tick_interval']            
             )
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=True)
+            if self.generate_traffic:
+                self.carla_environment.spawn_traffic(
+                    number_of_vehicles=self.num_traffic_vehicles,
+                    number_of_walkers=self.num_pedestrians
+                )
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)

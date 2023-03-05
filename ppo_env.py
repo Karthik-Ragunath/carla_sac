@@ -124,7 +124,10 @@ class CarlaEnv(object):
                 carla_port=self.params['port'],
                 carla_timeout=30.0,
                 sync=True,
-                tick_interval=self.params['sensor_tick']
+                tick_interval=self.params['sensor_tick'],
+                generate_traffic=self.params['generate_traffic'],
+                num_traffic_vehicles=self.params['num_traffic_vehicles'],
+                num_pedestrians=self.params['num_pedestrians']
             )
         )
         self._max_episode_steps = int(self.params['max_time_episode'])

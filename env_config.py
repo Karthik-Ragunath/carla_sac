@@ -45,7 +45,7 @@ train_envs_params['code_mode'] = train_code_mode
 train_envs_params['load_recent_model'] = True
 train_envs_params['image_dimensions'] = (96, 96)
 train_envs_params['generate_traffic'] = False
-train_envs_params['num_vehicles'] = 1
+train_envs_params['num_traffic_vehicles'] = 1
 train_envs_params['num_pedestrians'] = 0
 
 # evaluate env params
@@ -58,7 +58,7 @@ eval_env_params = temp_params
 eval_env_params['load_recent_model'] = True
 eval_env_params['image_dimensions'] = (96, 96)
 eval_env_params['generate_traffic'] = False
-eval_env_params['num_vehicles'] = 1
+eval_env_params['num_traffic_vehicles'] = 1
 eval_env_params['num_pedestrians'] = 0
 
 # test env params
@@ -71,7 +71,7 @@ test_env_params = temp_params
 test_env_params['load_recent_model'] = True
 test_env_params['image_dimensions'] = (96, 96)
 test_env_params['generate_traffic'] = False
-test_env_params['num_vehicles'] = 1
+test_env_params['num_traffic_vehicles'] = 1
 test_env_params['num_pedestrians'] = 0
 
 EnvConfig = {
