@@ -41,10 +41,10 @@
                 // "--render",
                 "--device_id", "0",
                 "--img-stack", "20",
-                "--log_seed", "5_2",
-                "--context", "inference_5",
+                "--log_seed", "6",
+                "--context", "inference_6",
                 "--num_steps_per_episode", "150",
-                "--load_context", "inference_5"
+                "--load_context", "inference_6"
             ]
         },
         {
@@ -59,9 +59,9 @@
                 // "--render",
                 "--device_id", "0",
                 "--img-stack", "20",
-                "--log_seed", "5_1",
+                "--log_seed", "6",
                 "--running_score", "15000",
-                "--context", "train_5",
+                "--context", "train_6",
                 "--load_context", "train_4",
                 "--num_steps_per_episode", "150"
             ]
