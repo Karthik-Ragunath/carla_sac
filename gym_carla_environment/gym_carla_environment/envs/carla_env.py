@@ -55,7 +55,7 @@ class CarlaEnv(gym.Env):
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
-            self.agent_vehicle.set_autopilot(False)
+            self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         else:
             self.carla_environment.close()
@@ -69,7 +69,7 @@ class CarlaEnv(gym.Env):
             self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
-            self.agent_vehicle.set_autopilot(False)
+            self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         frame_number = self.carla_environment.frame

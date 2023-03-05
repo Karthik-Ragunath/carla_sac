@@ -57,7 +57,13 @@ if __name__ == '__main__':
         os.makedirs(checkpoints_save_dir)
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
-        state = env.reset(episode_num=i_ep)
+        retry = True
+        while retry:
+            try:
+                state = env.reset(episode_num=i_ep)
+                retry = False
+            except Exception as e:
+                LOGGER.exception(f"EXCEPTION DURING RESET: - {e}")
 
         for step_index in range(args.num_steps_per_episode):
             action, a_logp = agent.select_action(state)
