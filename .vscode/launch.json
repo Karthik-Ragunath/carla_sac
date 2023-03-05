@@ -24,12 +24,9 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "args": [
-                "--image_dir",
-                "visualization_inference_5/0",
-                "--fps",
-                "10",
-                "--output_dir",
-                "visualization_videos/run_score_5"
+                "--image_dir", "visualization_inference_5/0",
+                "--fps", "10",
+                "--output_dir", "visualization_videos/reward_5"
             ]
         },
         {
@@ -42,18 +39,12 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--render",
-                "--device_id",
-                "0",
-                "--img-stack",
-                "20",
-                "--log_seed",
-                "5_1",
-                "--context",
-                "inference_5",
-                "--num_steps_per_episode",
-                "150",
-                "--load_context",
-                "inference_4"
+                "--device_id", "0",
+                "--img-stack", "20",
+                "--log_seed", "5_2",
+                "--context", "inference_5",
+                "--num_steps_per_episode", "150",
+                "--load_context", "inference_5"
             ]
         },
         {
@@ -68,7 +59,7 @@
                 // "--render",
                 "--device_id", "0",
                 "--img-stack", "20",
-                "--log_seed", "5",
+                "--log_seed", "5_1",
                 "--running_score", "15000",
                 "--context", "train_5",
                 "--load_context", "train_4",

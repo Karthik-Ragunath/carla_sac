@@ -53,7 +53,7 @@ class CarlaEnv(gym.Env):
                 sync=self.params['sync'],
                 tick_interval=self.params['tick_interval']            
             )
-            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
+            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=True)
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
@@ -68,7 +68,7 @@ class CarlaEnv(gym.Env):
                 sync=self.params['sync'],
                 tick_interval=self.params['tick_interval']            
             )
-            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
+            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=True)
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)

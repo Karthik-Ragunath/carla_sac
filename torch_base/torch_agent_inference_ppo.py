@@ -29,7 +29,7 @@ class Agent():
         return action
 
     def load_param(self, file_dir_path):
-        filenames = glob.glob(os.path.join(file_dir_path, "run_score_checkpoint_*.pkl"))
+        filenames = glob.glob(os.path.join(file_dir_path, "reward_checkpoint_*.pkl"))
         model_filename = None
         max_train_epoch = 0
         for filename in filenames:
