@@ -6,6 +6,7 @@ import numpy as np
 from queue import Queue
 from autopilot.environment.carla import CarlaEnvironment
 from autopilot.agent import AutonomousVehicle
+import time
 
 LOGGER = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ class CarlaEnv(gym.Env):
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
+            time.sleep(4)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         else:
             self.carla_environment.close()
@@ -70,6 +72,7 @@ class CarlaEnv(gym.Env):
             self.agent_vehicle.autopilot = False
             self.agent_vehicle.control = None
             self.agent_vehicle.set_autopilot(False, stop_vehicle=False)
+            time.sleep(4)
             self.carla_environment.add_tick_callback(self.block_msg_queue)
         current_snapshot = self.agent_vehicle.sensors['front_camera'].fetch()
         frame_number = self.carla_environment.frame
