@@ -32,7 +32,7 @@ class Env(object):
         self.action_dim = self.env.env.action_space.shape[0]
 
     def reset(self, episode_num: int):
-        if episode_num % 300 == 0:
+        if episode_num % 50 == 0:
             self.env.save_episode = True
             self.env.episode_num = episode_num
         else:
