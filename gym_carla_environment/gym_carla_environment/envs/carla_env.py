@@ -37,6 +37,7 @@ class CarlaEnv(gym.Env):
 
     def block_msg_queue(self):
         steer, throttle, brake = self.msg_queue.get()
+        LOGGER.info(f"steer: {steer} size: {self.msg_queue.qsize()}")
         vehicle_action = carla.VehicleControl(
             throttle=float(throttle),
             steer=float(steer),
@@ -120,9 +121,11 @@ class CarlaEnv(gym.Env):
         if self.steer < 0:
             right_steer = -(self.steer)
             left_steer = 0
+            LOGGER.info(f"right steer: {right_steer}")
         else:
             right_steer = 0
             left_steer = self.steer
+            LOGGER.info(f"left steer: {left_steer}")
 
         current_velocity = self.agent_vehicle.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
