@@ -33,11 +33,13 @@ class CarlaEnv(gym.Env):
         self.generate_traffic = params['generate_traffic']
         self.num_traffic_vehicles = params['num_traffic_vehicles']
         self.num_pedestrians = params['num_pedestrians']
+        self.queue_length = 0
         return
 
     def block_msg_queue(self):
         steer, throttle, brake = self.msg_queue.get()
-        LOGGER.info(f"steer: {steer} size: {self.msg_queue.qsize()}")
+        self.queue_length -= 1
+        # LOGGER.info(f"steer: {steer} size: {self.msg_queue.qsize()}")
         vehicle_action = carla.VehicleControl(
             throttle=float(throttle),
             steer=float(steer),
@@ -49,6 +51,7 @@ class CarlaEnv(gym.Env):
     def reset(self):
         """Reset function."""
         self.msg_queue = Queue()
+        self.queue_length = 0
         if not self.carla_environment:
             self.carla_environment = CarlaEnvironment(
                 carla_host=self.params['carla_host'],
@@ -99,7 +102,10 @@ class CarlaEnv(gym.Env):
             self.steer = steer
             self.throttle = throttle
             self.brake = brake
+            self.queue_length += 1
             self.msg_queue.put(action)
+            while self.queue_length > 0:
+                continue
             self.reward = self.get_reward()
             frame_number = self.carla_environment.frame
             return self.agent_vehicle.sensors['front_camera'].fetch(), self.reward, self.terminated, False, {"frame_number": frame_number}
@@ -121,11 +127,11 @@ class CarlaEnv(gym.Env):
         if self.steer < 0:
             right_steer = -(self.steer)
             left_steer = 0
-            LOGGER.info(f"right steer: {right_steer}")
+            # LOGGER.info(f"right steer: {right_steer}")
         else:
             right_steer = 0
             left_steer = self.steer
-            LOGGER.info(f"left steer: {left_steer}")
+            # LOGGER.info(f"left steer: {left_steer}")
 
         current_velocity = self.agent_vehicle.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])

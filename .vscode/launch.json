@@ -41,10 +41,10 @@
                 // "--render",
                 "--device_id", "0",
                 "--img-stack", "20",
-                "--log_seed", "7_1",
-                "--context", "inference_7",
+                "--log_seed", "101",
+                "--context", "inference_101",
                 "--num_steps_per_episode", "150",
-                "--load_context", "inference_7"
+                "--load_context", "inference_4"
             ]
         },
         {
@@ -59,10 +59,10 @@
                 // "--render",
                 "--device_id", "0",
                 "--img-stack", "20",
-                "--log_seed", "7",
+                "--log_seed", "101",
                 "--running_score", "15000",
-                "--context", "train_7",
-                "--load_context", "train_6",
+                "--context", "train_101",
+                "--load_context", "train_4",
                 "--num_steps_per_episode", "150"
             ]
         },
