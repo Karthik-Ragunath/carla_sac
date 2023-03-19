@@ -47,7 +47,7 @@ class Agent():
             checkpoints_save_dir = self.checkpoints_save_dir
         max_train_epoch = -1
         if self.env_params.get('load_recent_model', False):
-            filenames = glob.glob(os.path.join(checkpoints_save_dir, "run_score_checkpoint*.pkl"))
+            filenames = glob.glob(os.path.join(checkpoints_save_dir, "reward_checkpoint*.pkl"))
             model_filename = None
             for filename in filenames:
                 complete_path = filename 
