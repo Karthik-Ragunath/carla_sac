@@ -44,7 +44,7 @@ train_envs_params['port'] = train_env_port
 train_envs_params['code_mode'] = train_code_mode
 train_envs_params['load_recent_model'] = False
 train_envs_params['image_dimensions'] = (96, 96)
-train_envs_params['generate_traffic'] = False
+train_envs_params['generate_traffic'] = True
 train_envs_params['num_traffic_vehicles'] = 1
 train_envs_params['num_pedestrians'] = 0
 
