@@ -61,7 +61,7 @@
                 "--img-stack", "20",
                 "--log_seed", "101",
                 "--running_score", "15000",
-                "--context", "train_101",
+                "--context", "train_100",
                 "--load_context", "train_4",
                 "--num_steps_per_episode", "150"
             ]
