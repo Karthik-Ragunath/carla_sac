@@ -34,6 +34,7 @@ class CarlaEnv(gym.Env):
         self.num_traffic_vehicles = params['num_traffic_vehicles']
         self.num_pedestrians = params['num_pedestrians']
         self.queue_length = 0
+        self.zero_speed_stop_count = 0
         return
 
     def block_msg_queue(self):
@@ -52,6 +53,7 @@ class CarlaEnv(gym.Env):
         """Reset function."""
         self.msg_queue = Queue()
         self.queue_length = 0
+        self.zero_speed_stop_count = 0
         if not self.carla_environment:
             self.carla_environment = CarlaEnvironment(
                 carla_host=self.params['carla_host'],
@@ -134,13 +136,22 @@ class CarlaEnv(gym.Env):
             right_steer = 0
             left_steer = self.steer
             # LOGGER.info(f"left steer: {left_steer}")
-
+        
         current_velocity = self.agent_vehicle.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
         speed_kmph = 3.6 * curr_velocity_norm
-        negative_reward_per_step = -4
-        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4) + negative_reward_per_step
+
+        if speed_kmph < 2:
+            self.zero_speed_stop_count += 1
+        else:
+            self.zero_speed_stop_count = 0
+
+        if self.zero_speed_stop_count > 50:
+            self.terminated = True
+            return -500
+
+        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
         return reward
     
     def check_terminal(self):

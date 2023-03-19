@@ -77,6 +77,7 @@ if __name__ == '__main__':
             state = state_
             if done or die:
                 break
+            LOGGER.info('Ep {}\tLast score: {:.2f}\tStep Index: {}'.format(i_ep, score, step_index))
         running_score = running_score * 0.99 + score * 0.01
 
         if score > best_episode_reward:
