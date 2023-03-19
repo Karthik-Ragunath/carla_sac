@@ -98,6 +98,8 @@ class CarlaEnv(gym.Env):
     def step(self, action):
         """Step function."""
         try:
+            if self.queue_length > 0:
+                LOGGER.error("Queue length is > 0. Please check")
             steer, throttle, brake = action
             self.steer = steer
             self.throttle = throttle
