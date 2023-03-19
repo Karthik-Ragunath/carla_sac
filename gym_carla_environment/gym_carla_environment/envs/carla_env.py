@@ -80,7 +80,7 @@ class CarlaEnv(gym.Env):
                 sync=self.params['sync'],
                 tick_interval=self.params['tick_interval']            
             )
-            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=True)
+            self.agent_vehicle = self.carla_environment.spawn_agent_vehicle(fixed_spawn=False)
             if self.generate_traffic:
                 self.carla_environment.spawn_traffic(
                     number_of_vehicles=self.num_traffic_vehicles,
