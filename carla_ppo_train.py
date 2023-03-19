@@ -87,7 +87,7 @@ if __name__ == '__main__':
             best_episode_running_score = running_score
             agent.save_checkpoint_running_score(i_ep)
 
-        LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\tStep Index: {:.2f}'.format(i_ep, score, running_score, step_index))
+        LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\tStep Index: {}'.format(i_ep, score, running_score, step_index))
 
         writer.add_scalar('train_reward_score', score, i_ep)
         writer.add_scalar('train_reward_running_score', running_score, i_ep)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         if i_ep % args.log_interval == 0:
             if args.vis:
                 draw_reward(xdata=i_ep, ydata=running_score)
-            print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\tStep Index: {:.2f}'.format(i_ep, score, running_score, step_index))
+            print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\tStep Index: {}'.format(i_ep, score, running_score, step_index))
             agent.save_param()
         if running_score > args.running_score:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
