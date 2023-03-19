@@ -121,6 +121,7 @@ class CarlaEnv(gym.Env):
         """Get reward function."""
         self.terminated = self.check_terminal()
         if self.terminated:
+            LOGGER.error('Terminating due to crash.')
             return -500
         
         # current_velocity = self.agent_vehicle.get_velocity() # m/s
@@ -147,8 +148,9 @@ class CarlaEnv(gym.Env):
         else:
             self.zero_speed_stop_count = 0
 
-        if self.zero_speed_stop_count > 50:
+        if self.zero_speed_stop_count > 40:
             self.terminated = True
+            LOGGER.error('Terminating due to speed deficit.')
             return -500
 
         reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
