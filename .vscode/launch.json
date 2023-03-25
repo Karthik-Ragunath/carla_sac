@@ -60,6 +60,7 @@
                 "--device_id", "0",
                 "--img-stack", "20",
                 "--log_seed", "101",
+                "--action-repeat", "2",
                 "--running_score", "15000",
                 "--context", "train_101",
                 "--load_context", "train_4",

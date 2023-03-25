@@ -75,6 +75,8 @@ if __name__ == '__main__':
                 agent.update()
             score += reward
             state = state_
+            if step_index % 10 == 0:
+                LOGGER.info('Ep {}\tLast score: {:.2f}\tSteps: {}'.format(i_ep, score, step_index))
             if done or die:
                 break
         running_score = running_score * 0.99 + score * 0.01
