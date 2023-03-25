@@ -87,7 +87,7 @@ if __name__ == '__main__':
             best_episode_running_score = running_score
             agent.save_checkpoint_running_score(i_ep)
 
-        LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
+        LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\t Steps: {}'.format(i_ep, score, running_score, step_index))
 
         writer.add_scalar('train_reward_score', score, i_ep)
         writer.add_scalar('train_reward_running_score', running_score, i_ep)
