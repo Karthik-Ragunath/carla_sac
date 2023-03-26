@@ -53,6 +53,7 @@ class CarlaEnv(gym.Env):
         self.msg_queue = Queue()
         self.queue_length = 0
         self.location_history = []
+        self.zero_speed_stop_count = 0
         if not self.carla_environment:
             self.carla_environment = CarlaEnvironment(
                 carla_host=self.params['carla_host'],
@@ -121,27 +122,58 @@ class CarlaEnv(gym.Env):
             LOGGER.info('terminating due to crash')
             return -500
 
-        if self.steer < 0:
-            right_steer = -(self.steer)
-            left_steer = 0
-            # LOGGER.info(f"right steer: {right_steer}")
-        else:
-            right_steer = 0
-            left_steer = self.steer
-            # LOGGER.info(f"left steer: {left_steer}")
+        # if self.steer < 0:
+        #     right_steer = -(self.steer)
+        #     left_steer = 0
+        #     # LOGGER.info(f"right steer: {right_steer}")
+        # else:
+        #     right_steer = 0
+        #     left_steer = self.steer
+        #     # LOGGER.info(f"left steer: {left_steer}")
+
+        # Alternate way to compute forward
+        '''
+        yaw_global = np.radians(vehicle.get_transform().rotation)
+        rotation_global = np.array([
+            [np.sin(yaw_global),  np.cos(yaw_global)],
+            [np.cos(yaw_global), -np.sin(yaw_global)]
+        ])
+
+        velocity_global = vehicle.get_velocity()
+        velocity_global = np.array([velocity_global.y, velocity_global.x])
+        velocity_local = rotation_global.T @ velocity_global
+        '''
 
         current_velocity = self.agent_vehicle.get_velocity() # m/s
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
         speed_kmph = 3.6 * curr_velocity_norm
+
+        if speed_kmph < 2:
+            self.zero_speed_stop_count += 1
+        else:
+            self.zero_speed_stop_count = 0
+        
+        # <10 * x> -> x seconds in simualtor world
+        # sensor_tick - 0.1 seconds
+        # fixed_time_delta_between_frames = 0.025
+        # skip_frames = 0.1 / 0.025 = 4
+        # 1 step - 4 ticks - 0.1 seconds
+        # 60 steps - 0.1 * 60 = 6 seconds in simulator world
+
+        if self.zero_speed_stop_count >= 60:
+            self.terminated = True
+            LOGGER.error('Terminating due to speed deficit.')
+            return -500
+
         location_obj = self.agent_vehicle.get_transform().location
+        distance_reward = 0
         if len(self.location_history) == 10:
             distance_reward = abs(location_obj.distance(self.location_history[0])) + abs(location_obj.distance(self.location_history[4]))
-            self.location_history.append(location_obj)
             self.location_history.pop(0)
         elif len(self.location_history) > 0:
             distance_reward = abs(location_obj.distance(self.location_history[0]))
-            self.location_history.append(location_obj)
+        self.location_history.append(location_obj)
         # reward = speed_kmph / 5 + (left_steer * -0.5) + (right_steer * -0.5) + (self.throttle * 1) + (self.brake * -0.5)
         reward = speed_kmph / 5 + distance_reward
 

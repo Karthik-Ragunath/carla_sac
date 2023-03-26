@@ -16,8 +16,8 @@ class Agent():
     """
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
-    ppo_epoch = 4
-    buffer_capacity, batch_size = 32, 16
+    ppo_epoch = 6
+    buffer_capacity, batch_size = 300, 100
 
     def __init__(self, env_params, device, context, args):
         self.args = args
