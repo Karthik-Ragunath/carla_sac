@@ -52,6 +52,7 @@ class CarlaEnv(gym.Env):
         """Reset function."""
         self.msg_queue = Queue()
         self.queue_length = 0
+        self.location_history = []
         if not self.carla_environment:
             self.carla_environment = CarlaEnvironment(
                 carla_host=self.params['carla_host'],
@@ -119,11 +120,6 @@ class CarlaEnv(gym.Env):
         if self.terminated:
             LOGGER.info('terminating due to crash')
             return -500
-        
-        # current_velocity = self.agent_vehicle.get_velocity() # m/s
-        # curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
-        # curr_velocity_norm = np.linalg.norm(curr_velocity_array)
-        # reward = 3.6 * curr_velocity_norm # kmph
 
         if self.steer < 0:
             right_steer = -(self.steer)
@@ -138,7 +134,17 @@ class CarlaEnv(gym.Env):
         curr_velocity_array = np.array([current_velocity.x, current_velocity.y])
         curr_velocity_norm = np.linalg.norm(curr_velocity_array)
         speed_kmph = 3.6 * curr_velocity_norm
-        reward = speed_kmph / 5 + (left_steer * -0.6) + (right_steer * -0.2) + (self.throttle * 1) + (self.brake * -0.4)
+        location_obj = self.agent_vehicle.get_transform().location
+        if len(self.location_history) == 10:
+            distance_reward = abs(location_obj.distance(self.location_history[0])) + abs(location_obj.distance(self.location_history[4]))
+            self.location_history.append(location_obj)
+            self.location_history.pop(0)
+        elif len(self.location_history) > 0:
+            distance_reward = abs(location_obj.distance(self.location_history[0]))
+            self.location_history.append(location_obj)
+        # reward = speed_kmph / 5 + (left_steer * -0.5) + (right_steer * -0.5) + (self.throttle * 1) + (self.brake * -0.5)
+        reward = speed_kmph / 5 + distance_reward
+
         return reward
     
     def check_terminal(self):
