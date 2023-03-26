@@ -120,7 +120,7 @@ class CarlaEnv(gym.Env):
         self.terminated = self.check_terminal()
         if self.terminated:
             LOGGER.info('terminating due to crash')
-            return -500
+            return -200
 
         # if self.steer < 0:
         #     right_steer = -(self.steer)
@@ -164,7 +164,7 @@ class CarlaEnv(gym.Env):
         if self.zero_speed_stop_count >= 60:
             self.terminated = True
             LOGGER.error('Terminating due to speed deficit.')
-            return -500
+            return -200
 
         location_obj = self.agent_vehicle.get_transform().location
         distance_reward = 0
