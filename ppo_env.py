@@ -55,15 +55,17 @@ class Env(object):
             img_rgb_tuple, reward, die, _, _ = self.env.step(action)
             img_rgb = img_rgb_tuple[0]
             # don't penalize "die state"
-            if die:
-                reward += 100
+            # if die:
+            #     reward += 100
             # green penalty
-            if np.mean(img_rgb[:, :, 1]) > 185.0:
-                reward -= 0.05
+            # if np.mean(img_rgb[:, :, 1]) > 185.0:
+            #     reward -= 0.05
             total_reward += reward
             # if no reward recently, end the episode
-            done = True if self.av_r(reward) <= -0.1 else False
-            if done or die:
+            # done = True if self.av_r(reward) <= -0.1 else False
+            # if done or die:
+            #     break
+            if die:
                 break
         img_gray = self.rgb2gray(img_rgb)
         self.stack.pop(0)
