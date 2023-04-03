@@ -71,6 +71,7 @@ class Env(object):
         self.stack.pop(0)
         self.stack.append(img_gray)
         assert len(self.stack) == self.args.img_stack
+        done = False  # HARDFIX
         return np.array(self.stack), total_reward, done, die
 
     def render(self, *arg):
