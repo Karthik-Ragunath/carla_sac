@@ -55,10 +55,13 @@ class ImitationLearningAgent():
         self.device = device
         self.net = Net(self.args.img_stack).float().to(self.device)
         self.context = context
-        self.net.train()
+        # self.net.train()
+        self.checkpoints_save_dir =  'params_' + self.context
 
-    def save_param(self):
+    def save_param(self, epoch: int):
         torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, 'ppo_net_imitation_model_trained.pkl'))
+        torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, f'imitation_{epoch}.pkl'))
+
 
     def select_action(self, state: torch.Tensor):
         # state = torch.from_numpy(state).float().to(self.device).unsqueeze(0)
@@ -76,7 +79,7 @@ class ImitationLearningAgent():
             checkpoints_save_dir = self.checkpoints_save_dir
         max_train_epoch = -1
         if self.env_params.get('load_recent_model', False):
-            filenames = glob.glob(os.path.join(checkpoints_save_dir, "reward_checkpoint*.pkl"))
+            filenames = glob.glob(os.path.join(checkpoints_save_dir, "imitation_*.pkl"))
             model_filename = None
             for filename in filenames:
                 complete_path = filename 

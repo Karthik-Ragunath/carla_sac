@@ -79,8 +79,9 @@
                 "--device_id", "0",
                 "--log_seed", "1",
                 "--context", "imitation_1",
-                "--load_context", "train_100",
-                "--img-stack", "1"
+                "--load_context", "imitation_1",
+                "--img-stack", "1",
+                "--tbdir", "April_16_10_30"
             ]
         },
         {
