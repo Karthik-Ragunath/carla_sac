@@ -67,9 +67,9 @@ class CarlaDataset(Dataset):
         data = [float(self.csv_tuples[idx][2]),float(self.csv_tuples[idx][3]), float(self.csv_tuples[idx][4])]
 
         # border = (0, 150, 0, 0) # cut 0 from left, 30 from top, right, bottom
-
+        image_path = os.path.join(self.dataset_path, self.csv_tuples[idx][0])
         # Rgb image as a tensor
-        gray_image = Image.open(os.path.join(self.dataset_path, self.csv_tuples[idx][0])).convert('L')
+        gray_image = Image.open(image_path).convert('L')
         # gray_image = self.rgb2gray(rgb_image)
         # # # rgb_image = ImageOps.crop(rgb_image, border)
         # # rgb_tensor = self.transform(gray_image)
@@ -82,7 +82,7 @@ class CarlaDataset(Dataset):
         sem_tensor = self.transform(sem_image)
 
         # return rgb_tensor, sem_tensor, torch.tensor(data)
-        return gray_tensor, sem_tensor, torch.tensor(data)
+        return gray_tensor, sem_tensor, torch.tensor(data), image_path
 
 
 def load_data(dataset_path, num_workers=0, batch_size=32):
@@ -90,7 +90,8 @@ def load_data(dataset_path, num_workers=0, batch_size=32):
     Driver function to create dataset and return constructed dataloader.
     """
     dataset = CarlaDataset(dataset_path)
-    return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=False)
+    # return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=False)
+    return DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=False, drop_last=False)
 
 
 def accuracy(yhat, y): # yhat is not labels it is prediction

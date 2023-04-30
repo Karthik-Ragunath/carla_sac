@@ -75,6 +75,8 @@ if __name__ == "__main__":
     train_loader = load_data("/home/kxa200005/data/train")
     validation_loader = load_data("/home/kxa200005/data/valid")
 
+    train_iterations = 0
+    val_iterations = 0
     # --- SGD Iterations ---
     for epoch in range(pretrained_epochs + 1, args.epochs):
         
@@ -84,7 +86,7 @@ if __name__ == "__main__":
 
         # Per epoch train loop.
         agent.net.train()
-        for _, (rgb_input, sem_input, yhat) in enumerate(train_loader):
+        for _, (rgb_input, sem_input, yhat, image_path) in enumerate(train_loader):
             yhat = yhat.view(-1, 3, 1)
             yhat = yhat.cuda()
             optimizer.zero_grad()
@@ -97,18 +99,19 @@ if __name__ == "__main__":
             optimizer.step()
 
             # Record training loss and accuracy
-            tb.add_scalar("Train Loss", loss)
+            tb.add_scalar("Train Loss", loss, train_iterations)
             steer, throttle, brake, average = accuracy(ypred, yhat)
-            tb.add_scalar("Train Accuracy", average)
+            tb.add_scalar("Train Accuracy", average, train_iterations)
 
-            tb.add_scalar("Steer Accuracy", steer)
-            tb.add_scalar("Throttle Accuracy", throttle)
-            tb.add_scalar("Brake Accuracy", brake)
+            tb.add_scalar("Steer Accuracy", steer, train_iterations)
+            tb.add_scalar("Throttle Accuracy", throttle, train_iterations)
+            tb.add_scalar("Brake Accuracy", brake, train_iterations)
             LOGGER.info('Epoch {}\t Train Accuracy: {:.2f}\t Steer Accuracy: {:.2f}\t Throttle Accuracy: {:.2f} \t Brake Accuracy: {}'.format(epoch, average, steer, throttle, brake))
+            train_iterations += 1
         
         # After each train epoch, do validation before starting next train epoch.
         agent.net.eval()
-        for _, (rgb_input, sem_input, yhat) in enumerate(validation_loader):
+        for _, (rgb_input, sem_input, yhat, image_path) in enumerate(validation_loader):
             yhat = yhat.view(-1, 3, 1)
             yhat = yhat.cuda()
             with torch.no_grad():
@@ -119,9 +122,10 @@ if __name__ == "__main__":
                 loss = criterion(ypred, yhat)
 
             # Record validation loss and accuracy
-            tb.add_scalar("Validation Loss", loss)
+            tb.add_scalar("Validation Loss", loss, val_iterations)
             steer, throttle, brake, average = accuracy(ypred, yhat)
-            tb.add_scalar("Validation Accuracy", average)
+            tb.add_scalar("Validation Accuracy", average, val_iterations)
+            val_iterations += 1
             # tb.add_scalar("Steer Accuracy", steer, epoch)
             # tb.add_scalar("Throttle Accuracy", throttle, epoch)
             # tb.add_scalar("Brake Accuracy", brake, epoch)
