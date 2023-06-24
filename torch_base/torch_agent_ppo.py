@@ -40,6 +40,25 @@ class Agent():
         self.context = context
         self.checkpoints_save_dir =  'params_' + self.context
 
+    def load_param_imitation(self, load_context):
+        checkpoints_save_dir = 'params_' + load_context
+        max_train_epoch = -1
+        if self.env_params.get('load_recent_model', False):
+            filenames = glob.glob(os.path.join(checkpoints_save_dir, "imitation_*.pkl"))
+            model_filename = None
+            for filename in filenames:
+                complete_path = filename 
+                filename = Path(filename).stem
+                epoch_num = int(filename.split('_')[-1])
+                if epoch_num > max_train_epoch:
+                    max_train_epoch = epoch_num
+                    model_filename = complete_path
+            if model_filename:
+                self.net.load_state_dict(torch.load(
+                    os.path.join(os.getcwd(), model_filename), map_location=self.device
+                ))
+        return max_train_epoch
+
     def load_param(self, load_context: str = None) -> int:
         if load_context:
             checkpoints_save_dir = 'params_' + load_context

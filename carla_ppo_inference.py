@@ -21,6 +21,8 @@ parser.add_argument("--num_episodes", type=int, default=1, required=False)
 parser.add_argument("--context", type=str, default='inference', required=False)
 parser.add_argument("--num_steps_per_episode", type=int, default=250, required=False)
 parser.add_argument("--load_context", type=str, required=False)
+parser.add_argument("--load_imitation", action='store_true', help='load from imitation learning model')
+parser.add_argument("--imitation_context", type=str, default="params_imitation_1")
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -42,7 +44,11 @@ if __name__ == "__main__":
         corresponding_train_context = args.load_context.replace('inference', 'train')
     else:
         corresponding_train_context = args.context.replace('inference', 'train')
-    agent.load_param(file_dir_path="params_" + corresponding_train_context)
+    if args.load_imitation:
+        agent.load_param_imitation(load_context=args.imitation_context)
+    else:
+        agent.load_param(file_dir_path="params_" + corresponding_train_context)
+    # agent.load_param(file_dir_path="params_" + corresponding_train_context)
     env = Env(args=args, env_params=EnvConfig['test_env_params'], context=args.context, device=device)
 
     training_records = []

@@ -40,11 +40,13 @@
             "args": [
                 // "--render",
                 "--device_id", "0",
-                "--img-stack", "20",
+                "--img-stack", "1",
                 "--log_seed", "101",
                 "--context", "inference_101",
                 "--num_steps_per_episode", "150",
-                "--load_context", "inference_4"
+                "--load_context", "inference_4",
+                "--imitation_context", "imitation_1",
+                "--load_imitation"
             ]
         },
         {
@@ -64,7 +66,9 @@
                 "--running_score", "15000",
                 "--context", "train_103",
                 "--load_context", "train_100",
-                "--num_steps_per_episode", "150"
+                "--num_steps_per_episode", "150",
+                "--imitation_context", "imitation_1",
+                "--load_imitation"
             ]
         },
         {
@@ -81,7 +85,7 @@
                 "--context", "imitation_1",
                 "--load_context", "imitation_1",
                 "--img-stack", "1",
-                "--tbdir", "April_16_10_30"
+                "--tbdir", "April_16_10_30",
             ]
         },
         {
