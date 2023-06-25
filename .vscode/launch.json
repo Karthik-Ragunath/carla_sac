@@ -68,7 +68,8 @@
                 "--load_context", "train_100",
                 "--num_steps_per_episode", "150",
                 "--imitation_context", "imitation_1",
-                "--load_imitation"
+                "--load_imitation",
+                "--imitation_data_dir", "/home/kxa200005/github/mile/outputs/2023-06-11/22-49-45/save_data/"
             ]
         },
         {

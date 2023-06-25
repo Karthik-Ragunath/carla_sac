@@ -48,6 +48,9 @@ class Env(object):
         img_gray = self.rgb2gray(img_rgb)
         self.stack = [img_gray] * self.args.img_stack  # four frames for decision
         return np.array(self.stack)
+    
+    def reset_imitation(self):
+        """reset method for imitation."""
 
     def step(self, action):
         total_reward = 0

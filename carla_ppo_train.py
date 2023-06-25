@@ -8,6 +8,8 @@ from torch_base.torch_agent_ppo import Agent
 from ppo_env import Env
 from env_config import EnvConfig
 import os
+import pandas as pd
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -69,21 +71,38 @@ if __name__ == '__main__':
         #         retry = False
         #     except Exception as e:
         #         LOGGER.exception(f"EXCEPTION DURING RESET: - {e}")
-        state = env.reset(episode_num=i_ep)
-        for step_index in range(args.num_steps_per_episode):
-            action, a_logp = agent.select_action(state)
-            state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
-            if args.render:
-                env.render()
-            if agent.store((state, action, a_logp, reward, state_)):
-                print('updating')
-                agent.update()
-            score += reward
-            state = state_
-            if step_index % 10 == 0:
-                LOGGER.info('Ep {}\tLast score: {:.2f}\tSteps: {}'.format(i_ep, score, step_index))
-            if done or die:
-                break
+        if not args.load_imitation:
+            state = env.reset(episode_num=i_ep)
+            for step_index in range(args.num_steps_per_episode):
+                action, a_logp = agent.select_action(state)
+                state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
+                if args.render:
+                    env.render()
+                if agent.store((state, action, a_logp, reward, state_)):
+                    print('updating')
+                    agent.update()
+                score += reward
+                state = state_
+                if step_index % 10 == 0:
+                    LOGGER.info('Ep {}\tLast score: {:.2f}\tSteps: {}'.format(i_ep, score, step_index))
+                if done or die:
+                    break
+        else:
+            towns = os.listdir(args.imitation_data_dir)
+            for town in towns:
+                town_dir = os.path.join(args.imitation_data_dir, town)
+                train_runs = os.listdir(town_dir)
+                for train_run in train_runs:
+                    data_frame_path = os.path.join(town_dir, 'pd_dataframe.pkl')
+                    image_dir = os.path.join(town_dir, train_run, 'image')
+                    filenames = os.listdir(image_dir)
+                    sorted_filenames = sorted(filenames)
+                    gt_df = pd.read_pickle(data_frame_path)
+                    for filename in sorted_filenames:
+                        stemmed_filename = Path(filename).stem
+                        row_index = int(stemmed_filename.split('_')[-1])
+                        row_val = gt_df.iloc[0]
+                        
         running_score = running_score * 0.99 + score * 0.01
 
         if score > best_episode_reward:
