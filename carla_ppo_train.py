@@ -64,8 +64,7 @@ if __name__ == '__main__':
     checkpoints_save_dir = 'params_' + args.context
     if not os.path.exists(checkpoints_save_dir):
         os.makedirs(checkpoints_save_dir)
-    mse_loss = torch.nn.MSELoss()
-    optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
+    epoch_losses = []
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -91,7 +90,34 @@ if __name__ == '__main__':
                     LOGGER.info('Ep {}\tLast score: {:.2f}\tSteps: {}'.format(i_ep, score, step_index))
                 if done or die:
                     break
+            running_score = running_score * 0.99 + score * 0.01
+
+            if score > best_episode_reward:
+                best_episode_reward = score
+                agent.save_checkpoint_reward(i_ep)
+
+            if running_score > best_episode_running_score:
+                best_episode_running_score = running_score
+                agent.save_checkpoint_running_score(i_ep)
+
+            LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\t Steps: {}'.format(i_ep, score, running_score, step_index))
+
+            writer.add_scalar('train_reward_score', score, i_ep)
+            writer.add_scalar('train_reward_running_score', running_score, i_ep)
+            writer.add_scalar('train_steps', step_index, i_ep)
+
+            if i_ep % args.log_interval == 0:
+                if args.vis:
+                    draw_reward(xdata=i_ep, ydata=running_score)
+                print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
+                agent.save_param()
+            if running_score > args.running_score:
+                print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
+                break
         else:
+            mse_loss = torch.nn.MSELoss()
+            optimizer = optim.Adam(agent.net.parameters(), lr=1e-3)
+            epoch_loss = 0
             towns = os.listdir(args.imitation_data_dir)
             new_width, new_height = 96, 96
             for town in towns:
@@ -113,28 +139,5 @@ if __name__ == '__main__':
                         optimizer.zero_grad()
                         loss.backward()
                         optimizer.step()
-                        
-        running_score = running_score * 0.99 + score * 0.01
-
-        if score > best_episode_reward:
-            best_episode_reward = score
-            agent.save_checkpoint_reward(i_ep)
-
-        if running_score > best_episode_running_score:
-            best_episode_running_score = running_score
-            agent.save_checkpoint_running_score(i_ep)
-
-        LOGGER.info('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}\t Steps: {}'.format(i_ep, score, running_score, step_index))
-
-        writer.add_scalar('train_reward_score', score, i_ep)
-        writer.add_scalar('train_reward_running_score', running_score, i_ep)
-        writer.add_scalar('train_steps', step_index, i_ep)
-
-        if i_ep % args.log_interval == 0:
-            if args.vis:
-                draw_reward(xdata=i_ep, ydata=running_score)
-            print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(i_ep, score, running_score))
-            agent.save_param()
-        if running_score > args.running_score:
-            print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
-            break
+                        epoch_loss = loss.item()
+            epoch_losses.append(epoch_loss)
