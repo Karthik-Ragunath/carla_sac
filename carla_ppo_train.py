@@ -149,8 +149,8 @@ if __name__ == '__main__':
                         writer.add_scalar('step_loss', step_loss, step_loss_index)
                         step_loss_index += 1
                         total_epoch_steps += 1
+                    logging.info(f"epoch: {i_ep}, town: {town}, run: {train_run} completed")
                 os.makedirs("imitation_models", exist_ok=True)
                 torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))
-                logging.info(f"epoch: {i_ep}, town: {town}, run: {train_run} completed")
             epoch_loss /= total_epoch_steps
             writer.add_scalar('epoch_loss', epoch_loss, i_ep)
