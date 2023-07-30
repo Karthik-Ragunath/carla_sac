@@ -12,6 +12,7 @@ import pandas as pd
 from pathlib import Path
 import cv2
 import torch.optim as optim
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -31,6 +32,7 @@ parser.add_argument("--num_steps_per_episode", type=int, default=250, required=F
 parser.add_argument("--load_context", type=str, required=False)
 parser.add_argument("--load_imitation", action='store_true', help='load from imitation learning model')
 parser.add_argument("--imitation_context", type=str, default="params_imitation_1")
+parser.add_argument("--imitation_data_dir", type=str, help='directory where imitation data is present',  required=False)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -120,27 +122,35 @@ if __name__ == '__main__':
             epoch_loss = 0
             towns = os.listdir(args.imitation_data_dir)
             new_width, new_height = 96, 96
+            total_epoch_steps = 0
             for town in towns:
                 town_dir = os.path.join(args.imitation_data_dir, town)
                 train_runs = os.listdir(town_dir)
                 for train_run in train_runs:
-                    data_frame_path = os.path.join(town_dir, 'pd_dataframe.pkl')
+                    data_frame_path = os.path.join(town_dir, train_run, 'pd_dataframe.pkl')
                     gt_df = pd.read_pickle(data_frame_path)
-                    for row in gt_df:
-                        abs_image_path = os.path.join(town_dir, row['image_path'])
+                    for row_index in tqdm(range(len(gt_df))):
+                        row = gt_df.iloc[row_index]
+                        abs_image_path = os.path.join(town_dir, train_run, row['image_path'])
                         state = cv2.imread(abs_image_path)
-                        state = cv2.resize(state, (new_width, new_height))   
-                        action, a_logp = agent.select_action_imitation(state)
-                        action_predicted = row['action']
-                        loss = mse_loss(action, action_predicted)
+                        state = cv2.resize(state, (new_width, new_height))
+                        state = np.transpose(state, axes=(2, 0, 1))
+                        action_predicted = agent.select_action_imitation(state)
+                        action_predicted = torch.squeeze(action_predicted, 0)
+                        action = row['action']
+                        action[0], action[1] = action[1], action[0]
+                        action = torch.from_numpy(action).double().to(agent.device)
+                        loss = mse_loss(action_predicted, action)
                         optimizer.zero_grad()
                         loss.backward()
                         optimizer.step()
                         step_loss = loss.item()
                         epoch_loss += step_loss
                         writer.add_scalar('step_loss', step_loss, step_loss_index)
-                        writer.add_scalar('epoch_loss', epoch_loss,i_ep)
                         step_loss_index += 1
+                        total_epoch_steps += 1
                 os.makedirs("imitation_models", exist_ok=True)
                 torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))
-
+                logging.info(f"epoch: {i_ep}, town: {town}, run: {train_run} completed")
+            epoch_loss /= total_epoch_steps
+            writer.add_scalar('epoch_loss', epoch_loss, i_ep)

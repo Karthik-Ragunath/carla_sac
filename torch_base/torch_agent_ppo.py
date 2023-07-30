@@ -96,10 +96,8 @@ class Agent():
     def select_action_imitation(self, state):
         state = torch.from_numpy(state).double().to(self.device).unsqueeze(0)
         alpha, beta = self.net(state)[0]
-        dist = Beta(alpha, beta)
-        action = dist.sample()
-        a_logp = dist.log_prob(action).sum(dim=1)
-        return action, a_logp
+        action = alpha / (alpha + beta)
+        return action
 
     def save_param(self):
         torch.save(self.net.state_dict(), os.path.join(self.checkpoints_save_dir, 'ppo_net_params_model_trained.pkl'))
