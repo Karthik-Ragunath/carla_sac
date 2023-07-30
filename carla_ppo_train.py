@@ -64,7 +64,7 @@ if __name__ == '__main__':
     checkpoints_save_dir = 'params_' + args.context
     if not os.path.exists(checkpoints_save_dir):
         os.makedirs(checkpoints_save_dir)
-    epoch_losses = []
+    step_loss_index = 0
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -125,9 +125,6 @@ if __name__ == '__main__':
                 train_runs = os.listdir(town_dir)
                 for train_run in train_runs:
                     data_frame_path = os.path.join(town_dir, 'pd_dataframe.pkl')
-                    # image_dir = os.path.join(town_dir, train_run, 'image')
-                    # filenames = os.listdir(image_dir)
-                    # sorted_filenames = sorted(filenames)
                     gt_df = pd.read_pickle(data_frame_path)
                     for row in gt_df:
                         abs_image_path = os.path.join(town_dir, row['image_path'])
@@ -139,5 +136,11 @@ if __name__ == '__main__':
                         optimizer.zero_grad()
                         loss.backward()
                         optimizer.step()
-                        epoch_loss = loss.item()
-            epoch_losses.append(epoch_loss)
+                        step_loss = loss.item()
+                        epoch_loss += step_loss
+                        writer.add_scalar('step_loss', step_loss, step_loss_index)
+                        writer.add_scalar('epoch_loss', epoch_loss,i_ep)
+                        step_loss_index += 1
+                os.makedirs("imitation_models", exist_ok=True)
+                torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))
+
