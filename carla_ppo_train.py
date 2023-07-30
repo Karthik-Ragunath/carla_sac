@@ -11,6 +11,7 @@ import os
 import pandas as pd
 from pathlib import Path
 import cv2
+import torch.optim as optim
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -63,6 +64,8 @@ if __name__ == '__main__':
     checkpoints_save_dir = 'params_' + args.context
     if not os.path.exists(checkpoints_save_dir):
         os.makedirs(checkpoints_save_dir)
+    mse_loss = torch.nn.MSELoss()
+    optimizer = optim.Adam(self.net.parameters(), lr=1e-3)
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -101,22 +104,15 @@ if __name__ == '__main__':
                     # sorted_filenames = sorted(filenames)
                     gt_df = pd.read_pickle(data_frame_path)
                     for row in gt_df:
-                        abs_image_path = os.path.join(town_dir, image_path)
+                        abs_image_path = os.path.join(town_dir, row['image_path'])
                         state = cv2.imread(abs_image_path)
                         state = cv2.resize(state, (new_width, new_height))   
-                        action, a_logp = agent.select_action(state)
-                    state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
-                    if args.render:
-                        env.render()
-                    if agent.store((state, action, a_logp, reward, state_)):
-                        print('updating')
-                        agent.update()
-                    score += reward
-                    state = state_
-                    if step_index % 10 == 0:
-                        LOGGER.info('Ep {}\tLast score: {:.2f}\tSteps: {}'.format(i_ep, score, step_index))
-                    if done or die:
-                        break                                                       
+                        action, a_logp = agent.select_action_imitation(state)
+                        action_predicted = row['action']
+                        loss = mse_loss(action, action_predicted)
+                        optimizer.zero_grad()
+                        loss.backward()
+                        optimizer.step()
                         
         running_score = running_score * 0.99 + score * 0.01
 
