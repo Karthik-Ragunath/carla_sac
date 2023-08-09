@@ -10,18 +10,24 @@ from PIL import Image
 import time
 import sys
 import os
-sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/')
+import shutil
+
+# sys.path.append('/media/karthikragunath/Personal-Data/carla_sac/')
 from torch_base import DetectBoundingBox
 
 class Env(object):
-    def __init__(self, env_name, train_envs_params):
-        self.env = CarlaEnv(env_name=env_name, params=train_envs_params)
+    def __init__(self, env_name, train_envs_params, context):
+        self.env = CarlaEnv(env_name=env_name, params=train_envs_params, context=context)
         self.episode_reward = 0
         self.episode_steps = 0
         self._max_episode_steps = train_envs_params['max_time_episode']
         self.obs_dim = self.env.env.observation_space.shape[0]
         self.action_dim = self.env.env.action_space.shape[0]
         self.total_steps = 0
+        self.episode_count = 0
+        self.eval_episode_count = 0
+        self.train_vis_dir = context + '_train'
+        self.valid_vis_dir = context + '_valid'
 
     def reset(self):
         while True:
@@ -30,21 +36,19 @@ class Env(object):
                 continue
             else:
                 break
-        obs_tup = (obs[1], obs[2])
+        obs_tup = (obs[0], obs[1])
         self.obs = np.array(obs_tup)
         return self.obs
 
-    def step(self, action):
-        return_tuple = self.env.step(action)
+    def step(self, action, is_validation=False):
+        return_tuple = self.env.step(action, is_validation=is_validation)
         return_list, numpy_rgb_image, bounding_box_image = return_tuple
-        if numpy_rgb_image.any():
-            print("Image Does Exists")
-        self.next_waypoint_obs = return_list[0]
-        self.reward = return_list[1]
-        self.done = return_list[2]
-        self.info = return_list[3]
+        # if numpy_rgb_image.any():
+            # print("Image Does Exists")
+        self.reward = return_list[0]
+        self.done = return_list[1]
         self.next_obs_rgb = np.array((numpy_rgb_image, bounding_box_image))
-        return self.next_waypoint_obs, self.reward, self.done, self.info, self.next_obs_rgb
+        return self.reward, self.done, self.next_obs_rgb
 
     def get_obs(self):
         self.total_steps += 1
@@ -52,18 +56,35 @@ class Env(object):
         self.episode_reward += self.reward
         self.obs = self.next_obs_rgb
         if self.done or self.episode_steps >= self._max_episode_steps:
+            # TODO : Change to save every 10 episodes
+            if self.episode_count % 10 == 0:
+                self.episode_count += 1
+                self.env.save_episode = True
+                self.env.episode_num = self.episode_count
+                dir_path = os.path.join(os.getcwd(), self.train_vis_dir, str(self.env.episode_num))
+                if os.path.exists(dir_path):
+                    shutil.rmtree(dir_path)
+                os.mkdir(dir_path)
+            else:
+                self.episode_count += 1
+                self.env.save_episode = False
+                self.env.episode_num = -1
             tensorboard.add_scalar('train/episode_reward',
                                     self.episode_reward,
                                     self.total_steps)
-            logger.info('Train env done, Reward: {}'.format(self.episode_reward))
+            tensorboard.add_scalar('train/episode_steps',
+                                    self.episode_steps,
+                                    self.episode_count)
+            logger.info('Train env done, Reward: {reward}, Steps: {steps}'.format(reward=self.episode_reward, steps=self.episode_steps))
 
             self.episode_steps = 0
             self.episode_reward = 0
             obs_from_reset = self.env.reset()
-            obs = (obs_from_reset[1], obs_from_reset[2])
+            obs = (obs_from_reset[0], obs_from_reset[1])
             self.obs = np.array(obs)
         else:
-            print("EPISODE NOT DONE - CONTINUING")
+            # print("EPISODE NOT DONE - CONTINUING")
+            pass
         return self.obs
 
 
@@ -106,7 +127,7 @@ class LocalEnv(object):
         return action_out, current_image
 
 class CarlaEnv(object):
-    def __init__(self, env_name, params):
+    def __init__(self, env_name, params, context):
         class ActionSpace(object):
             def __init__(self,
                          action_space=None,
@@ -127,6 +148,11 @@ class CarlaEnv(object):
         self.action_space = ActionSpace(
             self.env.action_space, self.env.action_space.low,
             self.env.action_space.high, self.env.action_space.shape)
+        self.save_episode = False
+        self.episode_num = -1
+        self.eval_episode_num = 0
+        self.train_vis_dir = context + '_train'
+        self.valid_vis_dir = context + '_valid'
 
     def to_bgra_array(self, image):
         """Convert a CARLA raw image to a BGRA numpy array."""
@@ -143,23 +169,26 @@ class CarlaEnv(object):
         return array
 
     def reset(self):
-        obs, _, current_image = self.env.reset()
+        current_image = self.env.reset()
         bounded_image = None
         numpy_rgb_image = None
         if current_image:
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
-            plt.imshow(bounded_image)
-            plt.savefig("/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
-            print("Image Received In ParallelEnv Reset")
+            if self.save_episode:
+                fig = plt.figure()
+                plt.imshow(bounded_image)
+                plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN RESET")
-        return obs, numpy_rgb_image, bounded_image
+        return numpy_rgb_image, bounded_image
 
-    def step(self, action):
+    def step(self, action, is_validation=False):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
             'the action should be in range [-1.0, 1.0]'
+        # mapped_action = [-2, -2] * ((action + 1) * 2) = action * 2
         mapped_action = self.action_space.low + (action - (-1.0)) * (
             (self.action_space.high - self.action_space.low) / 2.0)
         mapped_action = np.clip(mapped_action, self.action_space.low, self.action_space.high)
@@ -170,6 +199,14 @@ class CarlaEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
             bounded_image = faster_rcnn_obj.detect_bounding_boxes()
+            if self.save_episode or is_validation:
+                fig = plt.figure()
+                plt.imshow(bounded_image)
+                if is_validation:
+                    plt.savefig(os.path.join(os.getcwd(), self.valid_vis_dir, str(self.eval_episode_num), (str(current_image.frame) + '.png')))
+                else:
+                    plt.savefig(os.path.join(os.getcwd(), self.train_vis_dir, str(self.episode_num), (str(current_image.frame) + '.png')))
+                plt.close(fig)
         else:
             print("NO IMAGE DETECTED FOR NOW IN STEP")
         return action_out, numpy_rgb_image, bounded_image

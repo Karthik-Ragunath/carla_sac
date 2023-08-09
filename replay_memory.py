@@ -2,7 +2,7 @@ import numpy as np
 from parl.utils import logger
 
 class ReplayMemory(object):
-    def __init__(self, max_size, obs_dim, act_dim):
+    def __init__(self, max_size, obs_dim, act_dim, merge_images=True, openai_mode=False):
         """ create a replay memory for off-policy RL or offline RL.
 
         Args:
@@ -15,7 +15,17 @@ class ReplayMemory(object):
         self.act_dim = act_dim
 
         # self.obs = np.zeros((max_size, obs_dim), dtype='float32')
-        self.obs = np.zeros((max_size, 2, 1080, 1920, 3), dtype='float32')
+        if not openai_mode:
+            if merge_images:
+                self.obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+            else:
+                self.obs = np.zeros((max_size, 1, 300, 300, 3), dtype='float32')
+        else:
+            if merge_images:
+                self.obs = np.zeros((max_size, 2, 224, 224, 3), dtype='float32')
+            else:
+                self.obs = np.zeros((max_size, 1, 224, 224, 3), dtype='float32')
+
         if act_dim == 0:  # Discrete control environment
             self.action = np.zeros((max_size, ), dtype='int32')
         else:  # Continuous control environment
@@ -23,7 +33,16 @@ class ReplayMemory(object):
         self.reward = np.zeros((max_size, ), dtype='float32')
         self.terminal = np.zeros((max_size, ), dtype='bool')
         # self.next_obs = np.zeros((max_size, obs_dim), dtype='float32')
-        self.next_obs = np.zeros((max_size, 2, 1080, 1920, 3), dtype='float32')
+        if not openai_mode:
+            if merge_images:
+                self.next_obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+            else:
+                self.next_obs = np.zeros((max_size, 1, 300, 300, 3), dtype='float32')
+        else:
+            if merge_images:
+                self.next_obs = np.zeros((max_size, 2, 224, 224, 3), dtype='float32')
+            else:
+                self.next_obs = np.zeros((max_size, 1, 224, 224, 3), dtype='float32')
 
         self._curr_size = 0
         self._curr_pos = 0
@@ -44,6 +63,34 @@ class ReplayMemory(object):
         action = self.action[batch_idx]
         next_obs = self.next_obs[batch_idx]
         terminal = self.terminal[batch_idx]
+        return obs, action, reward, next_obs, terminal
+
+    def sample_sequentially(self, batch_size, sequential_size=20):
+        max_size = self.max_size - 1
+        current_pos = self._curr_pos
+        left_max = current_pos - sequential_size
+        if left_max < 0:
+            reversed_size = -left_max
+            sampled_indices_1 = np.arange(current_pos)[::-1]
+            sampled_indices_2 = np.arange(max_size, max_size-reversed_size, -1)
+            sampled_indices = np.concatenate((sampled_indices_1, sampled_indices_2))
+            rest_samplable_sequence = np.arange(current_pos, max_size-reversed_size)
+            random_range = np.random.choice(rest_samplable_sequence, size = batch_size - sequential_size, replace=False)
+            sampled_indices = np.concatenate((sampled_indices, random_range))
+        else:
+            sampled_indices = np.arange(left_max, current_pos)[::-1]
+            rest_indices_left = np.arange(0, left_max)
+            rest_indices_right = np.arange(current_pos, max_size)
+            rest_indices_combined = np.concatenate((rest_indices_left, rest_indices_right))
+            random_choice = np.random.choice(rest_indices_combined, size=batch_size - sequential_size, replace=False)
+            sampled_indices = np.concatenate((sampled_indices, random_choice))
+
+        obs = self.obs[sampled_indices]
+        reward = self.reward[sampled_indices]
+        action = self.action[sampled_indices]
+        next_obs = self.next_obs[sampled_indices]
+        terminal = self.terminal[sampled_indices]
+
         return obs, action, reward, next_obs, terminal
 
     def make_index(self, batch_size):
