@@ -188,6 +188,7 @@ class CarlaEnv(object):
     def step(self, action, is_validation=False):
         assert np.all(((action<=1.0 + 1e-3), (action>=-1.0 - 1e-3))), \
             'the action should be in range [-1.0, 1.0]'
+        # mapped_action = [-2, -2] * ((action + 1) * 2) = action * 2
         mapped_action = self.action_space.low + (action - (-1.0)) * (
             (self.action_space.high - self.action_space.low) / 2.0)
         mapped_action = np.clip(mapped_action, self.action_space.low, self.action_space.high)

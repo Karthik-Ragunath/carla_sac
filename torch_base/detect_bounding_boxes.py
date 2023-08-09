@@ -4,27 +4,24 @@ import torch
 import glob as glob
 import sys
 import os
-# sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base')
-# sys.path.append('/media/karthikragunath/Personal-Data/carla_6/RL_CARLA')
 sys.path.append(os.path.join(os.getcwd(), 'torch_base'))
 sys.path.append(os.getcwd())
 from faster_rcnn_model import create_model
 import matplotlib.pyplot as plt
 import argparse
 
+'''
 # set the computation device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = "cpu"
-# load the model and the trained weights
+# TODO: Remove Hard-Coding
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 model = create_model(num_classes=5).to(device)
 print("1" * 50)
 model.load_state_dict(torch.load(
     os.path.join(os.getcwd(), 'torch_base/pretrained_model/model10.pth'), map_location=device
 ))
-# model.load_state_dict(torch.load(
-#     '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/torch_base/pretrained_model/model10.pth', map_location=device
-# ))
 model.eval()
+'''
+
 # classes: 0 index is reserved for background
 CLASSES = [
     '0', '1', '2', '3', '4'
@@ -39,11 +36,20 @@ directory_path = "/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/carla_rg
 bounding_box_directory_path = "/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/bounding_box_outputs"
 
 class DetectBoundingBox:
-    def __init__(self, image, image_name):
+    def __init__(self, device):
+        # set the computation device
+        self.device = device
+        self.model = create_model(num_classes=5).to(self.device)
+        self.model.load_state_dict(torch.load(
+            os.path.join(os.getcwd(), 'torch_base/pretrained_model/model10.pth'), map_location=self.device
+        ))
+        self.model.eval()
+        self.image = None
+        self.image_name = None
+
+    def detect_bounding_boxes(self, image, image_name):
         self.image = image
         self.image_name = image_name
-
-    def detect_bounding_boxes(self):
         # print("Image Name (Self):", self.image_name)
         # image = cv2.imread(directory_path + "/" + self.image_name)
         image = self.image
@@ -59,11 +65,11 @@ class DetectBoundingBox:
         # convert to tensor
         # image = torch.tensor(image, dtype=torch.float).cuda()
         image = torch.tensor(image, dtype=torch.float)
-        image = image.to(device)
+        image = image.to(self.device)
         # add batch dimension
         image = torch.unsqueeze(image, 0)
         with torch.no_grad():
-            outputs = model(image)
+            outputs = self.model(image)
 
         # load all detection to CPU for further operations
         outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]

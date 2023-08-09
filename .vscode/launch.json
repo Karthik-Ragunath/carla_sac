@@ -1,0 +1,116 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "video_viz",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/util_video_visualization.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--image_dir",
+                "visualization_inference_4/0",
+                "--fps",
+                "10",
+                "--output_dir",
+                "visualization_videos/4/run_score"
+            ]
+        },
+        {
+            "name": "ppo_carla_racing_inference",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/carla_ppo_inference.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--device_id", "0",
+                "--img-stack", "20",
+                "--log_seed", "4_1",
+                "--context", "inference_4",
+                "--num_steps_per_episode", "150"
+            ]
+        },
+        {
+            "name": "ppo_carla_racing",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/carla_ppo_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                // "--render",
+                "--device_id", "0",
+                "--img-stack", "20",
+                "--log_seed", "5",
+                "--running_score", "15000",
+                "--context", "train_5",
+                "--load_context", "train_4",
+                "--num_steps_per_episode", "150"
+            ]
+        },
+        {
+            "name": "openai_racing",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/openai_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--load_recent_model",
+                "--model_framework",
+                "openai",
+                "--train_context",
+                "actor_critic_v5",
+                "--mode",
+                "train",
+                "--device_id",
+                "1"
+            ]
+        },
+        {
+            "name": "detect_bounding_box",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/torch_base/detect_bounding_boxes.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/",
+            "args": [
+                "--image_path",
+                "test_carla_image.png",
+                "--image_width",
+                "300",
+                "--image_height",
+                "300"
+            ]
+        },
+        {
+            "name": "train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "args": [
+                "--xparl_addr",
+                "localhost:8080",
+                "--framework",
+                "torch",
+                "--train_total_steps",
+                "351100"
+            ],
+            "subProcess": true,
+            "python": "${command:python.interpreterPath}"
+        }
+    ]
+}

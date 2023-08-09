@@ -2,7 +2,7 @@ import numpy as np
 from parl.utils import logger
 
 class ReplayMemory(object):
-    def __init__(self, max_size, obs_dim, act_dim):
+    def __init__(self, max_size, obs_dim, act_dim, merge_images=True, openai_mode=False):
         """ create a replay memory for off-policy RL or offline RL.
 
         Args:
@@ -15,7 +15,17 @@ class ReplayMemory(object):
         self.act_dim = act_dim
 
         # self.obs = np.zeros((max_size, obs_dim), dtype='float32')
-        self.obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+        if not openai_mode:
+            if merge_images:
+                self.obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+            else:
+                self.obs = np.zeros((max_size, 1, 300, 300, 3), dtype='float32')
+        else:
+            if merge_images:
+                self.obs = np.zeros((max_size, 2, 224, 224, 3), dtype='float32')
+            else:
+                self.obs = np.zeros((max_size, 1, 224, 224, 3), dtype='float32')
+
         if act_dim == 0:  # Discrete control environment
             self.action = np.zeros((max_size, ), dtype='int32')
         else:  # Continuous control environment
@@ -23,7 +33,16 @@ class ReplayMemory(object):
         self.reward = np.zeros((max_size, ), dtype='float32')
         self.terminal = np.zeros((max_size, ), dtype='bool')
         # self.next_obs = np.zeros((max_size, obs_dim), dtype='float32')
-        self.next_obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+        if not openai_mode:
+            if merge_images:
+                self.next_obs = np.zeros((max_size, 2, 300, 300, 3), dtype='float32')
+            else:
+                self.next_obs = np.zeros((max_size, 1, 300, 300, 3), dtype='float32')
+        else:
+            if merge_images:
+                self.next_obs = np.zeros((max_size, 2, 224, 224, 3), dtype='float32')
+            else:
+                self.next_obs = np.zeros((max_size, 1, 224, 224, 3), dtype='float32')
 
         self._curr_size = 0
         self._curr_pos = 0
