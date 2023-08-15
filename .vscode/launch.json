@@ -12,8 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
-            "args": [
-            ]
+            "args": []
         },
         {
             "name": "video_viz",
@@ -69,7 +68,8 @@
                 "--num_steps_per_episode", "150",
                 "--imitation_context", "imitation_1",
                 "--load_imitation",
-                "--imitation_data_dir", "/home/kxa200005/github/mile/outputs/2023-06-11/22-49-45/save_data/"
+                // "--imitation_data_dir", "/home/kxa200005/github/mile/outputs/2023-06-11/22-49-45/save_data/"
+                "--imitation_data_dir", "mile_captured_data/2023-06-11/22-49-45/save_data/"
             ]
         },
         {
@@ -92,7 +92,8 @@
                 "--num_steps_per_episode", "150",
                 "--imitation_context", "imitation_1",
                 "--load_imitation",
-                "--imitation_data_dir", "/home/kxa200005/github/mile/outputs/2023-06-11/22-49-45/save_data/"
+                // "--imitation_data_dir", "/home/kxa200005/github/mile/outputs/2023-06-11/22-49-45/save_data/"
+                "--imitation_data_dir", "mile_captured_data/2023-06-11/22-49-45/save_data/"
             ]
         },
         {

@@ -67,6 +67,9 @@ if __name__ == '__main__':
     if not os.path.exists(checkpoints_save_dir):
         os.makedirs(checkpoints_save_dir)
     step_loss_index = 0
+    agent.net.train()
+    mse_loss = torch.nn.MSELoss()
+    optimizer = optim.Adam(agent.net.parameters(), lr=1e-3)
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -117,8 +120,6 @@ if __name__ == '__main__':
                 print("Solved! Running reward is now {} and the last episode runs to {}!".format(running_score, score))
                 break
         else:
-            mse_loss = torch.nn.MSELoss()
-            optimizer = optim.Adam(agent.net.parameters(), lr=1e-3)
             epoch_loss = 0
             towns = os.listdir(args.imitation_data_dir)
             new_width, new_height = 96, 96
@@ -140,8 +141,8 @@ if __name__ == '__main__':
                         action = row['action']
                         action[0], action[1] = action[1], action[0]
                         action = torch.from_numpy(action).double().to(agent.device)
-                        loss = mse_loss(action_predicted, action)
                         optimizer.zero_grad()
+                        loss = mse_loss(action_predicted, action)
                         loss.backward()
                         optimizer.step()
                         step_loss = loss.item()
@@ -149,6 +150,8 @@ if __name__ == '__main__':
                         writer.add_scalar('step_loss', step_loss, step_loss_index)
                         step_loss_index += 1
                         total_epoch_steps += 1
+                        if row_index == 3:
+                            break
                     logging.info(f"epoch: {i_ep}, town: {town}, run: {train_run} completed")
                 os.makedirs("imitation_models", exist_ok=True)
                 torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))

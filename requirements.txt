@@ -1,3 +1,5 @@
+# python 3.8
+
 #gym==0.12.5
 #pygame==1.9.6
 gym
@@ -5,15 +7,23 @@ pygame
 opencv-python
 parl
 matplotlib
-gym[box2d]
+# gym[box2d]
+pip install swig
+pip install gymnasium[box2d]
 visdom
 carla==0.9.13
 scikit-image
 tensorboard
 # conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+pip install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
 matplotlib
+pandas
+tqdm
 # transforms3d
 #paddlepaddle-gpu
 ##Install paddle or torch wrt which base you are using(paddle or torch)
 #--find-links https://download.pytorch.org/whl/torch_stable.html
 #torch
+
+cd gym_carla_environment
+pip install -e .
