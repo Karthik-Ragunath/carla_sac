@@ -70,10 +70,11 @@ if __name__ == '__main__':
     step_loss_index = 0
     agent.net.train()
     mse_loss = torch.nn.MSELoss()
-    optimizer = optim.Adam(agent.net.parameters(), lr=1e-5)
+    # optimizer = optim.Adam(agent.net.parameters(), lr=1e-5)
+    optimizer = optim.AdamW(agent.net.parameters(), lr=1e-5)
     # Create the ExponentialLR scheduler with gamma value
-    gamma = 0.91
-    scheduler = ExponentialLR(optimizer, gamma=gamma)
+    # gamma = 0.96
+    # scheduler = ExponentialLR(optimizer, gamma=gamma)
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -154,11 +155,11 @@ if __name__ == '__main__':
                         writer.add_scalar('step_loss', step_loss, step_loss_index)
                         step_loss_index += 1
                         total_epoch_steps += 1
-                        if row_index == 3:
-                            break
+                        # if row_index == 3:
+                        #     break
                 os.makedirs("imitation_models", exist_ok=True)
                 torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))
-            scheduler.step()
+            # scheduler.step()
             logging.info(f"epoch: {i_ep}, epoch_loss: {epoch_loss}, total_epoch_steps: {total_epoch_steps}")
             epoch_loss /= total_epoch_steps
             writer.add_scalar('epoch_loss', epoch_loss, i_ep)
