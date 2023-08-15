@@ -13,6 +13,7 @@ from pathlib import Path
 import cv2
 import torch.optim as optim
 from tqdm import tqdm
+from torch.optim.lr_scheduler import ExponentialLR
 
 parser = argparse.ArgumentParser(description='Train a PPO agent for the CarRacing-v0')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G', help='discount factor (default: 0.99)')
@@ -69,7 +70,10 @@ if __name__ == '__main__':
     step_loss_index = 0
     agent.net.train()
     mse_loss = torch.nn.MSELoss()
-    optimizer = optim.Adam(agent.net.parameters(), lr=1e-3)
+    optimizer = optim.Adam(agent.net.parameters(), lr=1e-5)
+    # Create the ExponentialLR scheduler with gamma value
+    gamma = 0.91
+    scheduler = ExponentialLR(optimizer, gamma=gamma)
     for i_ep in range(pretrained_epoch + 1, args.num_episodes):
         score = 0
         # retry = True
@@ -152,8 +156,9 @@ if __name__ == '__main__':
                         total_epoch_steps += 1
                         if row_index == 3:
                             break
-                    logging.info(f"epoch: {i_ep}, town: {town}, run: {train_run} completed")
                 os.makedirs("imitation_models", exist_ok=True)
                 torch.save(agent.net.state_dict(), os.path.join("imitation_models", f"epoch__{i_ep}__{town}.pt"))
+            scheduler.step()
+            logging.info(f"epoch: {i_ep}, epoch_loss: {epoch_loss}, total_epoch_steps: {total_epoch_steps}")
             epoch_loss /= total_epoch_steps
             writer.add_scalar('epoch_loss', epoch_loss, i_ep)
