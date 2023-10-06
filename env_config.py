@@ -45,8 +45,20 @@ train_envs_params['code_mode'] = train_code_mode
 train_envs_params['load_recent_model'] = False
 train_envs_params['image_dimensions'] = (96, 96)
 train_envs_params['generate_traffic'] = False
-train_envs_params['num_traffic_vehicles'] = 1
+train_envs_params['num_traffic_vehicles'] = 0
 train_envs_params['num_pedestrians'] = 0
+
+# train env params
+imitation_env_port = 2021
+imitation_code_mode = 'imitation'
+imitation_envs_params = deepcopy(params)
+imitation_envs_params['port'] = imitation_env_port
+imitation_envs_params['code_mode'] = imitation_code_mode
+imitation_envs_params['load_recent_model'] = True
+imitation_envs_params['image_dimensions'] = (96, 96)
+imitation_envs_params['generate_traffic'] = False
+imitation_envs_params['num_traffic_vehicles'] = 0
+imitation_envs_params['num_pedestrians'] = 0
 
 # evaluate env params
 eval_port = 2027
@@ -77,6 +89,7 @@ test_env_params['num_pedestrians'] = 0
 EnvConfig = {
     # train envs config
     'train_envs_params': train_envs_params,
+    'imitation_env_params': imitation_envs_params,
     'train_env_params': train_envs_params,
 
     # eval env config
