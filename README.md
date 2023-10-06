@@ -82,4 +82,4 @@ https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/60661989-9203-4a0c
 
 ### In CARLA Environment
 
-https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/26280c00-5974-4895-87f8-71c115d661f5
+https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/3addf341-1135-46a9-8d8a-3648d87bfdbe
