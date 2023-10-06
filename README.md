@@ -84,7 +84,3 @@ https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/60661989-9203-4a0c
 ### In CARLA Environment
 
 https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/b3679a88-228c-443d-ba8b-99638abb5095
-
-![](https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/b3679a88-228c-443d-ba8b-99638abb5095)
-
-https://github.com/Karthik-Ragunath/carla_sac/blob/feature/imitation_learning/assets/visualization_inference_4_0.mp4
