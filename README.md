@@ -72,10 +72,9 @@ python util_video_visualization.py  --image_dir visualization_inference_3/reward
 
 ### Example: Inference on model trained for 5 hrs on Zero Traffic Simulation
 
-[Sample Video Link](https://github.com/Karthik-Ragunath/carla_sac/blob/feature/ppo_carla/assets/visualization_inference_4_0.mp4)
+[Sample Video Link](https://github.com/Karthik-Ragunath/carla_sac/blob/feature/imitation_learning/assets/visualization_inference_4_0.mp4)
 
 ## Sample Inference Videos
-
 
 ### In OpenAI Gym Environment
 
@@ -83,4 +82,4 @@ https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/60661989-9203-4a0c
 
 ### In CARLA Environment
 
-https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/b3679a88-228c-443d-ba8b-99638abb5095
+https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/26280c00-5974-4895-87f8-71c115d661f5
