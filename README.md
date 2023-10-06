@@ -76,11 +76,11 @@ python util_video_visualization.py  --image_dir visualization_inference_3/reward
 
 ## Sample Inference Videos
 
-### In CARLA Environment
-
-https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/c45f142c-5376-4762-aaae-3b01da1fda8e
 
 ### In OpenAI Gym Environment
 
 https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/60661989-9203-4a0c-867e-1a89f86b6f3f
 
+### In CARLA Environment
+
+https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/b3679a88-228c-443d-ba8b-99638abb5095
