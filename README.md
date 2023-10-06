@@ -78,7 +78,7 @@ python util_video_visualization.py  --image_dir visualization_inference_3/reward
 
 ### In CARLA Environment
 
-https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/ab0dd40e-90d1-4a7d-b331-d10ac83cd219
+https://github.com/Karthik-Ragunath/carla_sac/assets/16360004/c45f142c-5376-4762-aaae-3b01da1fda8e
 
 ### In OpenAI Gym Environment
 
